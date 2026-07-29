@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ORACLE — an autonomous treasury</title>
+<meta name="description" content="A wallet with an opinion. Creator fees in, directives out. Every action on-chain." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='34' fill='none' stroke='%237b5cff' stroke-width='8'/><circle cx='50' cy='50' r='10' fill='%2322d3ee'/></svg>" />
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div class="glow" aria-hidden="true"></div>
+
+<header class="topbar">
+  <a class="brand" href="#top">
+    <span class="sigil" aria-hidden="true"></span>
+    <span class="brand-name" data-bind="entity">ORACLE</span>
+  </a>
+  <nav class="topnav">
+    <a href="#treasury">Treasury</a>
+    <a href="#doctrine">Doctrine</a>
+    <a href="#ledger">Ledger</a>
+    <a href="#laws">Laws</a>
+  </nav>
+  <span class="pulse" id="statusPill"><i></i><span>listening</span></span>
+</header>
+
+<main id="top">
+
+  <!-- ───────────────────────── hero ───────────────────────── -->
+  <section class="hero">
+    <p class="eyebrow">
+      <span data-bind="chain">Solana</span>
+      <span class="dot">·</span>
+      <span data-bind="ticker">$ORACLE</span>
+    </p>
+    <h1 class="title">
+      <span class="line">I hold the keys.</span>
+      <span class="line accent">I run the coin.</span>
+    </h1>
+    <p class="lede" data-bind="tagline">An autonomous treasury with an opinion.</p>
+    <p class="sub">
+      Creator fees flow to one address. Nothing is withdrawn. Everything that
+      arrives is turned back on the chart, according to a doctrine that does not
+      negotiate.
+    </p>
+    <div class="cta-row">
+      <button class="btn primary" data-copy-wallet>
+        <span class="btn-label">Copy the wallet</span>
+        <span class="btn-sub" data-bind="walletShort">—</span>
+      </button>
+      <a class="btn ghost" href="#treasury">Watch it work</a>
+    </div>
+    <p class="hero-note" id="modeNote"></p>
+  </section>
+
+  <!-- ─────────────────────── treasury ─────────────────────── -->
+  <section id="treasury" class="section">
+    <div class="section-head">
+      <h2>The Treasury</h2>
+      <p>One wallet. Publicly readable. Permanently on watch.</p>
+    </div>
+
+    <div class="wallet-card">
+      <div class="wallet-head">
+        <span class="tag">operating address</span>
+        <a class="explorer" data-bind="explorerLink" href="#" target="_blank" rel="noopener">open in explorer ↗</a>
+      </div>
+      <div class="wallet-addr">
+        <code data-bind="walletFull">—</code>
+        <button class="copy-btn" data-copy-wallet aria-label="Copy wallet address">copy</button>
+      </div>
+      <div class="wallet-foot">
+        Fees settle here on every trade. The balance below is what has not yet
+        been deployed.
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat">
+        <span class="stat-label">Fees collected</span>
+        <span class="stat-value" data-stat="feesTotal">—</span>
+        <span class="stat-meta" data-stat="feesRate">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Deployed to buybacks</span>
+        <span class="stat-value" data-stat="buybackTotal">—</span>
+        <span class="stat-meta" data-stat="buybackCount">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Supply burned</span>
+        <span class="stat-value" data-stat="burned">—</span>
+        <span class="stat-meta">removed permanently</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Undeployed balance</span>
+        <span class="stat-value" data-stat="idle">—</span>
+        <span class="stat-meta" data-stat="nextAction">—</span>
+      </div>
+    </div>
+
+    <figure class="chart-card">
+      <figcaption>
+        <span>Fees deployed — last 72 hours</span>
+        <span class="legend">
+          <i class="k-fee"></i>fees in
+          <i class="k-buy"></i>bids out
+        </span>
+      </figcaption>
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 720 240" preserveAspectRatio="none" role="img"
+             aria-label="Cumulative creator fees collected versus deployed into buybacks"></svg>
+      </div>
+    </figure>
+  </section>
+
+  <!-- ─────────────────────── doctrine ─────────────────────── -->
+  <section id="doctrine" class="section">
+    <div class="section-head">
+      <h2>The Doctrine</h2>
+      <p>Every unit that arrives has somewhere it is already going.</p>
+    </div>
+    <div class="doctrine-grid" id="doctrineGrid"></div>
+  </section>
+
+  <!-- ──────────────────────── ledger ──────────────────────── -->
+  <section id="ledger" class="section">
+    <div class="section-head">
+      <h2>Directive Log</h2>
+      <p>What the wallet did, and why it decided to.</p>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="terminal-title">oracle://directives</span>
+        <span class="terminal-meta" id="ledgerMeta">—</span>
+      </div>
+      <ol class="log" id="log" aria-live="polite"></ol>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── laws ───────────────────────── -->
+  <section id="laws" class="section">
+    <div class="section-head">
+      <h2>Laws</h2>
+      <p>Constraints the entity accepted before it was given a key.</p>
+    </div>
+    <ol class="laws" id="laws"></ol>
+  </section>
+
+  <section class="closer">
+    <p class="closer-line">The doctrine does not care how you feel about the candle.</p>
+    <p class="closer-sub">It only asks whether the fees arrived.</p>
+    <button class="btn primary" data-copy-wallet>
+      <span class="btn-label">Copy the wallet</span>
+      <span class="btn-sub" data-bind="walletShort">—</span>
+    </button>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="foot-links" id="footLinks"></div>
+  <p class="disclaimer">
+    <strong>Not financial advice.</strong> <span data-bind="ticker">$ORACLE</span> is a
+    memecoin. It has no intrinsic value, no revenue, and no expectation of
+    return. Nothing here is a promise about price. Verify every claim against
+    the wallet on-chain before you believe it — including the ones on this page.
+    Only commit what you are willing to lose entirely.
+  </p>
+  <p class="copy">The wallet is the only source of truth.</p>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
