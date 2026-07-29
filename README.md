@@ -30,7 +30,7 @@ touching.
 The two addresses it is built around:
 
 ```js
-token:  { mint: "5HeG…pump",  explorer: "https://solscan.io/token/" },
+token:  { mint: "7Urj…pump",  explorer: "https://solscan.io/token/" },
 wallet: { address: "EPdm…CEbo", explorer: "https://solscan.io/account/" },
 ```
 
@@ -51,9 +51,10 @@ progress bars, and how the simulated directive log allocates each batch.
 `config.data.mode` selects where the numbers come from.
 
 **`"simulated"` (default).** A deterministic local model: fee inflow accrues on
-a 20-minute batch cadence from a fixed genesis date, splits by doctrine weight,
-and generates a plausible directive log. Same numbers on every machine, and
-they grow over time. The hero carries a visible **"Simulated telemetry"** label
+an hourly batch cadence, splits by doctrine weight, and generates a plausible
+directive log. Genesis is anchored 34 days behind the current UTC day, so the
+entity always reads as a young coin instead of drifting into absurd lifetime
+totals. Same numbers on every machine, and they move through the day. The hero carries a visible **"Simulated telemetry"** label
 in this mode — leave that label intact for as long as the mode is on. Presenting
 modelled treasury figures as a real balance is the one thing this page must
 never do.

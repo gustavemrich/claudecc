@@ -15,7 +15,7 @@ window.ORACLE_CONFIG = {
    * The mint. This is the only contract address; anything else claiming to
    * be $ORACLE is not. */
   token: {
-    mint: "5HeGQ2HSSN9rcruzjrbLmH1tMYPAEu5iQAtXHrcnpump",
+    mint: "7Urjb7cvHyPmyS1pu836aYAKwb73Zto9ePP1kajcpump",
     explorer: "https://solscan.io/token/",
   },
 
@@ -80,8 +80,8 @@ window.ORACLE_CONFIG = {
    * chart/contract are derived from the mint above — change them if the coin
    * trades somewhere else. */
   links: {
-    chart: "https://dexscreener.com/solana/5HeGQ2HSSN9rcruzjrbLmH1tMYPAEu5iQAtXHrcnpump",
+    chart: "https://dexscreener.com/solana/7Urjb7cvHyPmyS1pu836aYAKwb73Zto9ePP1kajcpump",
     community: "",
-    contract: "https://solscan.io/token/5HeGQ2HSSN9rcruzjrbLmH1tMYPAEu5iQAtXHrcnpump",
+    contract: "https://solscan.io/token/7Urjb7cvHyPmyS1pu836aYAKwb73Zto9ePP1kajcpump",
   },
 };
