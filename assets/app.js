@@ -244,28 +244,6 @@
     explorerLink("explorerLink", (CFG.wallet && CFG.wallet.explorer) || "", wallet);
     explorerLink("mintLink", (CFG.token && CFG.token.explorer) || "", mint);
 
-    // doctrine cards
-    var grid = $("#doctrineGrid");
-    if (grid) {
-      grid.innerHTML = DOCTRINE.map(function (d, i) {
-        return (
-          '<article class="doctrine-card" data-seg="' + i + '" data-spotlight' +
-          ' data-reveal style="--i:' + i + ';--seg:' + segColor(i) + '">' +
-          '<div class="doctrine-weight">' + d.weight + "<span>%</span></div>" +
-          '<h3 class="doctrine-label">' + esc(d.label) + "</h3>" +
-          '<p class="doctrine-note">' + esc(d.note) + "</p>" +
-          "</article>"
-        );
-      }).join("");
-      requestAnimationFrame(function () {
-        $$(".doctrine-card", grid).forEach(function (el, i) {
-          el.style.setProperty("--w", DOCTRINE[i].weight + "%");
-        });
-      });
-    }
-
-    drawRing();
-
     // laws — note the id, not #laws: that one belongs to the <section>
     var laws = $("#lawsList");
     if (laws) {
@@ -293,89 +271,6 @@
         ? "Figures read live from the treasury. Verify them on-chain."
         : "<b>Simulated telemetry</b> — this deployment is not yet wired to a live wallet. Numbers below are a model, not a balance.";
     }
-  }
-
-  /* ── allocation ring ────────────────────────────────── */
-
-  var SEG_COLORS = ["#7b5cff", "#22d3ee", "#ffb547", "#5b6180"];
-  function segColor(i) { return SEG_COLORS[i % SEG_COLORS.length]; }
-
-  var RING_R = 74;
-  var RING_C = 2 * Math.PI * RING_R;
-
-  function drawRing() {
-    var svg = $("#ringChart");
-    if (!svg || !DOCTRINE.length) return;
-
-    var total = DOCTRINE.reduce(function (a, d) { return a + d.weight; }, 0) || 100;
-    var offset = 0;
-
-    svg.innerHTML = DOCTRINE.map(function (d, i) {
-      var len = (d.weight / total) * RING_C;
-      var seg =
-        '<circle class="seg" data-seg="' + i + '" cx="100" cy="100" r="' + RING_R + '"' +
-        ' stroke="' + segColor(i) + '" color="' + segColor(i) + '"' +
-        ' stroke-dasharray="0 ' + RING_C.toFixed(1) + '"' +
-        ' stroke-dashoffset="' + (-offset).toFixed(1) + '"' +
-        ' data-len="' + Math.max(0, len - 2.5).toFixed(1) + '"></circle>';
-      offset += len;
-      return seg;
-    }).join("");
-
-    var segs = $$(".seg", svg);
-
-    // grow the segments in once the ring scrolls into view
-    var fill = function () {
-      segs.forEach(function (s, i) {
-        setTimeout(function () {
-          s.setAttribute("stroke-dasharray", s.getAttribute("data-len") + " " + RING_C.toFixed(1));
-        }, i * 130);
-      });
-    };
-    if ("IntersectionObserver" in window) {
-      var io = new IntersectionObserver(function (es) {
-        es.forEach(function (e) {
-          if (!e.isIntersecting) return;
-          fill();
-          io.disconnect();
-        });
-      }, { threshold: 0.25 });
-      io.observe(svg);
-    } else {
-      fill();
-    }
-
-    // hovering either the ring or a card highlights the pair and relabels the hub
-    var cards = $$(".doctrine-card");
-    var hub = { value: $(".ring-value"), label: $(".ring-label") };
-
-    function focus(idx) {
-      segs.forEach(function (s, i) {
-        s.classList.toggle("hot", i === idx);
-        s.classList.toggle("dim", idx != null && i !== idx);
-      });
-      cards.forEach(function (c, i) { c.classList.toggle("hot", i === idx); });
-
-      if (!hub.value || !hub.label) return;
-      if (idx == null) {
-        hub.value.innerHTML = "100<i>%</i>";
-        hub.value.style.color = "";
-        hub.label.textContent = "of every fee";
-      } else {
-        hub.value.innerHTML = DOCTRINE[idx].weight + "<i>%</i>";
-        hub.value.style.color = segColor(idx);
-        hub.label.textContent = DOCTRINE[idx].label;
-      }
-    }
-
-    segs.forEach(function (s, i) {
-      s.addEventListener("pointerenter", function () { focus(i); });
-      s.addEventListener("pointerleave", function () { focus(null); });
-    });
-    cards.forEach(function (c, i) {
-      c.addEventListener("pointerenter", function () { focus(i); });
-      c.addEventListener("pointerleave", function () { focus(null); });
-    });
   }
 
   function explorerLink(bind, base, id) {

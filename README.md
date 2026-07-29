@@ -19,7 +19,7 @@ python3 -m http.server 8000
 | --- | --- |
 | `index.html` | Page structure |
 | `assets/style.css` | All styling |
-| `assets/app.js` | Data layer, chart, ring, directive log, clipboard |
+| `assets/app.js` | Data layer, chart, directive log, clipboard |
 | `assets/fx.js` | Atmosphere: constellation, boot, reveals, scrambles |
 | `assets/sim.js` | The "Watch It Work" sandbox |
 | `config.js` | **Everything you need to edit** |
@@ -40,8 +40,8 @@ It exists to make two laws visible rather than merely stated:
 
 It runs only while scrolled into view and never behind a hidden tab. Under
 reduced motion it does not auto-start; the toggle reads "Run" and waits.
-Retuning `config.doctrine` weights changes the sandbox's behaviour too, so the
-model and the stated doctrine cannot drift apart.
+Since the weights come from `config.doctrine`, the sandbox and the treasury
+model cannot drift apart.
 
 ## Motion
 
@@ -76,8 +76,10 @@ the explorer so anyone can check them.
 `links.chart` and `links.contract` are derived from the mint (Dexscreener and
 Solscan). Repoint them if the coin trades somewhere else.
 
-`doctrine[].weight` values should sum to 100 — they drive the percentages, the
-progress bars, and how the simulated directive log allocates each batch.
+`doctrine[].weight` values should sum to 100. They have no section of their
+own on the page any more, but they still drive real behaviour: how the
+simulated treasury splits each batch, how the directive log allocates, and the
+sandbox's allocation bars. Changing a weight changes all three.
 
 ## Data modes
 

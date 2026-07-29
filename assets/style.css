@@ -704,110 +704,6 @@ main, .topbar, .footer, .marquee { position: relative; z-index: 2; }
   color: #4a5068;
 }
 
-/* ── doctrine ───────────────────────────────────────────── */
-.doctrine-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 30px;
-  align-items: start;
-}
-
-.ring-wrap { position: relative; aspect-ratio: 1; }
-.ring-chart { width: 100%; height: 100%; transform: rotate(-90deg); }
-.ring-chart .seg {
-  fill: none;
-  stroke-width: 13;
-  stroke-linecap: butt;
-  cursor: pointer;
-  opacity: 0.9;
-  transition: stroke-width 0.25s, opacity 0.25s, filter 0.25s,
-              stroke-dasharray 1.2s cubic-bezier(0.3, 0.8, 0.3, 1);
-}
-.ring-chart .seg.dim { opacity: 0.22; }
-.ring-chart .seg.hot {
-  stroke-width: 19;
-  opacity: 1;
-  filter: drop-shadow(0 0 10px currentColor);
-}
-
-.ring-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  pointer-events: none;
-  text-align: center;
-}
-.ring-value {
-  font-size: 40px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-  transition: color 0.25s;
-}
-.ring-value i { font-size: 17px; color: var(--ink-faint); font-style: normal; }
-.ring-label {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  max-width: 70%;
-}
-
-.doctrine-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 12px;
-  align-content: start;
-}
-.doctrine-card {
-  position: relative;
-  overflow: hidden;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  background: var(--panel);
-  cursor: default;
-  transition: border-color 0.3s, transform 0.3s, background 0.3s;
-}
-.doctrine-card::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 2px;
-  width: var(--w, 0%);
-  background: linear-gradient(90deg, var(--seg, var(--violet)), var(--cyan));
-  transition: width 1.1s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-.doctrine-card.hot {
-  border-color: var(--seg, var(--violet));
-  transform: translateY(-3px);
-  background: linear-gradient(180deg, rgba(123, 92, 255, 0.08), transparent 60%), var(--panel);
-}
-.doctrine-weight {
-  font-size: 34px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  color: var(--seg, var(--violet-soft));
-  font-variant-numeric: tabular-nums;
-}
-.doctrine-weight span { font-size: 16px; color: var(--ink-faint); }
-.doctrine-label {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink);
-  margin: 8px 0 10px;
-}
-.doctrine-note { color: var(--ink-dim); font-size: 14px; margin: 0; }
-
 /* ── simulator ──────────────────────────────────────────── */
 .sim {
   display: grid;
@@ -1225,11 +1121,6 @@ main, .topbar, .footer, .marquee { position: relative; z-index: 2; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 /* ── responsive ─────────────────────────────────────────── */
-@media (max-width: 900px) {
-  .doctrine-layout { grid-template-columns: 1fr; }
-  .ring-wrap { max-width: 260px; margin: 0 auto 8px; }
-}
-
 @media (max-width: 720px) {
   .topnav { display: none; }
   .log li { grid-template-columns: 74px 1fr; }
