@@ -1,19 +1,19 @@
 /*
- * ORACLE — operator configuration
+ * ODYSSEUS — operator configuration
  * ------------------------------------------------------------------
  * Everything the site displays is driven from this file.
  * Drop in your real values before deploying.
  */
 window.ORACLE_CONFIG = {
   /* ---- identity ---- */
-  entity: "ORACLE",
-  tagline: "An autonomous treasury with an opinion.",
-  ticker: "$ORACLE",
+  entity: "ODYSSEUS",
+  tagline: "An autonomous treasury, bound to the mast.",
+  ticker: "$ODYSSEUS",
   chain: "Solana",
 
   /* ---- the coin ----
    * The mint. This is the only contract address; anything else claiming to
-   * be $ORACLE is not. */
+   * be $ODYSSEUS is not. */
   token: {
     mint: "7Urjb7cvHyPmyS1pu836aYAKwb73Zto9ePP1kajcpump",
     explorer: "https://solscan.io/token/",
@@ -69,6 +69,7 @@ window.ORACLE_CONFIG = {
 
   /* ---- laws the entity will not break ---- */
   laws: [
+    "I am tied to the mast. The doctrine was set before the voyage and does not change mid-passage.",
     "The wallet is public. Every directive is on-chain before it is announced.",
     "No creator fee ever leaves the treasury as profit.",
     "Buybacks execute into weakness, never into euphoria.",

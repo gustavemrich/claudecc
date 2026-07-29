@@ -3,20 +3,41 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ORACLE — an autonomous treasury</title>
+<title>Odysseus — an autonomous treasury</title>
 <meta name="description" content="A wallet with an opinion. Creator fees in, directives out. Every action on-chain." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='34' fill='none' stroke='%237b5cff' stroke-width='8'/><circle cx='50' cy='50' r='10' fill='%2322d3ee'/></svg>" />
 <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
-<div class="grain" aria-hidden="true"></div>
+
+<!-- ── boot sequence ── -->
+<div class="boot" id="boot" aria-hidden="true">
+  <div class="boot-inner">
+    <div class="boot-sigil"></div>
+    <pre class="boot-log" id="bootLog"></pre>
+    <span class="boot-skip">click to skip</span>
+  </div>
+</div>
+
+<!-- ── atmosphere ── -->
+<canvas class="fx-net" id="fxNet" aria-hidden="true"></canvas>
 <div class="glow" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="spotlight" aria-hidden="true"></div>
+
+<div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
 
 <header class="topbar">
   <a class="brand" href="#top">
-    <span class="sigil" aria-hidden="true"></span>
-    <span class="brand-name" data-bind="entity">ORACLE</span>
+    <span class="sigil" aria-hidden="true">
+      <svg viewBox="0 0 40 40">
+        <circle class="ring r1" cx="20" cy="20" r="16" />
+        <circle class="ring r2" cx="20" cy="20" r="11" />
+        <circle class="core" cx="20" cy="20" r="4" />
+      </svg>
+    </span>
+    <span class="brand-name" data-bind="entity">ODYSSEUS</span>
   </a>
   <nav class="topnav">
     <a href="#treasury">Treasury</a>
@@ -31,46 +52,53 @@
 
   <!-- ───────────────────────── hero ───────────────────────── -->
   <section class="hero">
-    <p class="eyebrow">
+    <p class="eyebrow" data-reveal style="--i:0">
       <span data-bind="chain">Solana</span>
       <span class="dot">·</span>
-      <span data-bind="ticker">$ORACLE</span>
+      <span data-bind="ticker">$ODYSSEUS</span>
     </p>
     <h1 class="title">
-      <span class="line">I hold the keys.</span>
-      <span class="line accent">I run the coin.</span>
+      <span class="line" data-scramble="I hold the keys.">I hold the keys.</span>
+      <span class="line accent" data-scramble="I run the coin." data-delay="420">I run the coin.</span>
     </h1>
-    <p class="lede" data-bind="tagline">An autonomous treasury with an opinion.</p>
-    <p class="sub">
+    <p class="lede" data-bind="tagline" data-reveal style="--i:1">An autonomous treasury, bound to the mast.</p>
+    <p class="sub" data-reveal style="--i:2">
       Creator fees flow to one address. Nothing is withdrawn. Everything that
       arrives is turned back on the chart, according to a doctrine that does not
       negotiate.
     </p>
+
     <div class="ca-bar" data-copy="mint" role="button" tabindex="0"
-         aria-label="Copy the contract address">
+         data-reveal style="--i:3" aria-label="Copy the contract address">
       <span class="ca-tag">CA</span>
       <code data-bind="mintFull">—</code>
       <span class="ca-copy">copy</span>
     </div>
 
-    <div class="cta-row">
+    <div class="cta-row" data-reveal style="--i:4">
       <button class="btn primary" data-copy="mint">
         <span class="btn-label">Copy the contract</span>
         <span class="btn-sub" data-bind="mintShort">—</span>
       </button>
       <a class="btn ghost" href="#treasury">Watch it work</a>
     </div>
-    <p class="hero-note" id="modeNote"></p>
+    <p class="hero-note" id="modeNote" data-reveal style="--i:5"></p>
   </section>
+
+  <!-- ── ticker ── -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" id="marqueeTrack"></div>
+  </div>
 
   <!-- ─────────────────────── treasury ─────────────────────── -->
   <section id="treasury" class="section">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
+      <span class="section-index">01</span>
       <h2>The Treasury</h2>
       <p>One wallet. Publicly readable. Permanently on watch.</p>
     </div>
 
-    <div class="wallet-card">
+    <div class="wallet-card" data-reveal data-spotlight style="--i:0">
       <div class="wallet-head">
         <span class="tag">contract address</span>
         <a class="explorer" data-bind="mintLink" href="#" target="_blank" rel="noopener">open in explorer ↗</a>
@@ -84,7 +112,7 @@
       </div>
     </div>
 
-    <div class="wallet-card">
+    <div class="wallet-card" data-reveal data-spotlight style="--i:1">
       <div class="wallet-head">
         <span class="tag">operating address</span>
         <a class="explorer" data-bind="explorerLink" href="#" target="_blank" rel="noopener">open in explorer ↗</a>
@@ -100,29 +128,29 @@
     </div>
 
     <div class="stat-grid">
-      <div class="stat">
+      <div class="stat" data-reveal data-spotlight style="--i:0">
         <span class="stat-label">Fees collected</span>
         <span class="stat-value" data-stat="feesTotal">—</span>
         <span class="stat-meta" data-stat="feesRate">—</span>
       </div>
-      <div class="stat">
+      <div class="stat" data-reveal data-spotlight style="--i:1">
         <span class="stat-label">Deployed to buybacks</span>
         <span class="stat-value" data-stat="buybackTotal">—</span>
         <span class="stat-meta" data-stat="buybackCount">—</span>
       </div>
-      <div class="stat">
+      <div class="stat" data-reveal data-spotlight style="--i:2">
         <span class="stat-label">Supply burned</span>
         <span class="stat-value" data-stat="burned">—</span>
         <span class="stat-meta">removed permanently</span>
       </div>
-      <div class="stat">
+      <div class="stat" data-reveal data-spotlight style="--i:3">
         <span class="stat-label">Undeployed balance</span>
         <span class="stat-value" data-stat="idle">—</span>
         <span class="stat-meta" data-stat="nextAction">—</span>
       </div>
     </div>
 
-    <figure class="chart-card">
+    <figure class="chart-card" data-reveal>
       <figcaption>
         <span>Fees deployed — last 72 hours</span>
         <span class="legend">
@@ -130,33 +158,53 @@
           <i class="k-buy"></i>bids out
         </span>
       </figcaption>
-      <div class="chart-wrap">
+      <div class="chart-wrap" id="chartWrap">
         <svg id="chart" viewBox="0 0 720 240" preserveAspectRatio="none" role="img"
-             aria-label="Cumulative creator fees collected versus deployed into buybacks"></svg>
+             aria-label="Creator fees collected versus deployed into buybacks over the last 72 hours"></svg>
+        <div class="chart-tip" id="chartTip" aria-hidden="true"></div>
       </div>
+      <div class="chart-axis" id="chartAxis"></div>
     </figure>
   </section>
 
   <!-- ─────────────────────── doctrine ─────────────────────── -->
   <section id="doctrine" class="section">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
+      <span class="section-index">02</span>
       <h2>The Doctrine</h2>
       <p>Every unit that arrives has somewhere it is already going.</p>
     </div>
-    <div class="doctrine-grid" id="doctrineGrid"></div>
+
+    <div class="doctrine-layout">
+      <div class="ring-wrap" data-reveal>
+        <svg class="ring-chart" id="ringChart" viewBox="0 0 200 200" role="img"
+             aria-label="How creator fees are allocated"></svg>
+        <div class="ring-center" id="ringCenter">
+          <span class="ring-value">100<i>%</i></span>
+          <span class="ring-label">of every fee</span>
+        </div>
+      </div>
+      <div class="doctrine-grid" id="doctrineGrid"></div>
+    </div>
   </section>
 
   <!-- ──────────────────────── ledger ──────────────────────── -->
   <section id="ledger" class="section">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
+      <span class="section-index">03</span>
       <h2>Directive Log</h2>
       <p>What the wallet did, and why it decided to.</p>
     </div>
-    <div class="terminal">
+    <div class="terminal" data-reveal>
       <div class="terminal-bar">
         <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="terminal-title">oracle://directives</span>
+        <span class="terminal-title">odysseus://directives</span>
         <span class="terminal-meta" id="ledgerMeta">—</span>
+      </div>
+      <div class="log-status">
+        <span class="caret">›</span>
+        <span id="logStatus">watching the book</span>
+        <span class="cursor" aria-hidden="true"></span>
       </div>
       <ol class="log" id="log" aria-live="polite"></ol>
     </div>
@@ -164,27 +212,30 @@
 
   <!-- ───────────────────────── laws ───────────────────────── -->
   <section id="laws" class="section">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
+      <span class="section-index">04</span>
       <h2>Laws</h2>
       <p>Constraints the entity accepted before it was given a key.</p>
     </div>
-    <ol class="laws" id="laws"></ol>
+    <ol class="laws" id="lawsList"></ol>
   </section>
 
   <section class="closer">
-    <p class="closer-line">The doctrine does not care how you feel about the candle.</p>
-    <p class="closer-sub">It only asks whether the fees arrived.</p>
-    <button class="btn primary" data-copy="mint">
-      <span class="btn-label">Copy the contract</span>
-      <span class="btn-sub" data-bind="mintShort">—</span>
-    </button>
+    <p class="closer-line" data-reveal>The doctrine does not care how you feel about the candle.</p>
+    <p class="closer-sub" data-reveal style="--i:1">It only asks whether the fees arrived.</p>
+    <div data-reveal style="--i:2">
+      <button class="btn primary" data-copy="mint">
+        <span class="btn-label">Copy the contract</span>
+        <span class="btn-sub" data-bind="mintShort">—</span>
+      </button>
+    </div>
   </section>
 </main>
 
 <footer class="footer">
   <div class="foot-links" id="footLinks"></div>
   <p class="disclaimer">
-    <strong>Not financial advice.</strong> <span data-bind="ticker">$ORACLE</span> is a
+    <strong>Not financial advice.</strong> <span data-bind="ticker">$ODYSSEUS</span> is a
     memecoin. It has no intrinsic value, no revenue, and no expectation of
     return. Nothing here is a promise about price. Verify every claim against
     the wallet on-chain before you believe it — including the ones on this page.
@@ -196,6 +247,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="config.js"></script>
+<script src="assets/fx.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>

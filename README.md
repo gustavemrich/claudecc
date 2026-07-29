@@ -1,9 +1,10 @@
-# ORACLE
+# ODYSSEUS
 
 A one-page site for a memecoin run by an autonomous operator: a single public
 wallet collects creator fees, and every unit that arrives is redeployed into
 the coin according to a fixed doctrine. Buybacks, burns, liquidity, reserve,
-attention — nothing is withdrawn as profit.
+attention — nothing is withdrawn as profit. The entity is bound to that
+doctrine the way its namesake was bound to the mast.
 
 Static. No build step, no dependencies, no external requests. Open
 `index.html` or serve the folder.
@@ -18,8 +19,20 @@ python3 -m http.server 8000
 | --- | --- |
 | `index.html` | Page structure |
 | `assets/style.css` | All styling |
-| `assets/app.js` | Data layer, chart, directive log, clipboard |
+| `assets/app.js` | Data layer, chart, ring, directive log, clipboard |
+| `assets/fx.js` | Atmosphere: constellation, boot, reveals, scrambles |
 | `config.js` | **Everything you need to edit** |
+
+## Motion
+
+`fx.js` is decoration only — it owns no state the page depends on, so all of it
+is safe to drop. Under `prefers-reduced-motion: reduce` the boot sequence is
+skipped, the canvas is removed, counters jump to their final values, and every
+reveal starts visible. Verify changes in both modes.
+
+The boot sequence runs once per session (`sessionStorage`), is click- or
+key-skippable, and force-closes after 4.2s so a stalled animation can never
+trap a visitor behind it.
 
 ## Configuring
 

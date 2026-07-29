@@ -247,9 +247,10 @@
     // doctrine cards
     var grid = $("#doctrineGrid");
     if (grid) {
-      grid.innerHTML = DOCTRINE.map(function (d) {
+      grid.innerHTML = DOCTRINE.map(function (d, i) {
         return (
-          '<article class="doctrine-card">' +
+          '<article class="doctrine-card" data-seg="' + i + '" data-spotlight' +
+          ' data-reveal style="--i:' + i + ';--seg:' + segColor(i) + '">' +
           '<div class="doctrine-weight">' + d.weight + "<span>%</span></div>" +
           '<h3 class="doctrine-label">' + esc(d.label) + "</h3>" +
           '<p class="doctrine-note">' + esc(d.note) + "</p>" +
@@ -263,11 +264,13 @@
       });
     }
 
-    // laws
-    var laws = $("#laws");
+    drawRing();
+
+    // laws — note the id, not #laws: that one belongs to the <section>
+    var laws = $("#lawsList");
     if (laws) {
-      laws.innerHTML = (CFG.laws || []).map(function (l) {
-        return "<li>" + esc(l) + "</li>";
+      laws.innerHTML = (CFG.laws || []).map(function (l, i) {
+        return '<li style="--i:' + i + '">' + esc(l) + "</li>";
       }).join("");
     }
 
@@ -292,6 +295,89 @@
     }
   }
 
+  /* ── allocation ring ────────────────────────────────── */
+
+  var SEG_COLORS = ["#7b5cff", "#22d3ee", "#ffb547", "#5b6180"];
+  function segColor(i) { return SEG_COLORS[i % SEG_COLORS.length]; }
+
+  var RING_R = 74;
+  var RING_C = 2 * Math.PI * RING_R;
+
+  function drawRing() {
+    var svg = $("#ringChart");
+    if (!svg || !DOCTRINE.length) return;
+
+    var total = DOCTRINE.reduce(function (a, d) { return a + d.weight; }, 0) || 100;
+    var offset = 0;
+
+    svg.innerHTML = DOCTRINE.map(function (d, i) {
+      var len = (d.weight / total) * RING_C;
+      var seg =
+        '<circle class="seg" data-seg="' + i + '" cx="100" cy="100" r="' + RING_R + '"' +
+        ' stroke="' + segColor(i) + '" color="' + segColor(i) + '"' +
+        ' stroke-dasharray="0 ' + RING_C.toFixed(1) + '"' +
+        ' stroke-dashoffset="' + (-offset).toFixed(1) + '"' +
+        ' data-len="' + Math.max(0, len - 2.5).toFixed(1) + '"></circle>';
+      offset += len;
+      return seg;
+    }).join("");
+
+    var segs = $$(".seg", svg);
+
+    // grow the segments in once the ring scrolls into view
+    var fill = function () {
+      segs.forEach(function (s, i) {
+        setTimeout(function () {
+          s.setAttribute("stroke-dasharray", s.getAttribute("data-len") + " " + RING_C.toFixed(1));
+        }, i * 130);
+      });
+    };
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          fill();
+          io.disconnect();
+        });
+      }, { threshold: 0.25 });
+      io.observe(svg);
+    } else {
+      fill();
+    }
+
+    // hovering either the ring or a card highlights the pair and relabels the hub
+    var cards = $$(".doctrine-card");
+    var hub = { value: $(".ring-value"), label: $(".ring-label") };
+
+    function focus(idx) {
+      segs.forEach(function (s, i) {
+        s.classList.toggle("hot", i === idx);
+        s.classList.toggle("dim", idx != null && i !== idx);
+      });
+      cards.forEach(function (c, i) { c.classList.toggle("hot", i === idx); });
+
+      if (!hub.value || !hub.label) return;
+      if (idx == null) {
+        hub.value.innerHTML = "100<i>%</i>";
+        hub.value.style.color = "";
+        hub.label.textContent = "of every fee";
+      } else {
+        hub.value.innerHTML = DOCTRINE[idx].weight + "<i>%</i>";
+        hub.value.style.color = segColor(idx);
+        hub.label.textContent = DOCTRINE[idx].label;
+      }
+    }
+
+    segs.forEach(function (s, i) {
+      s.addEventListener("pointerenter", function () { focus(i); });
+      s.addEventListener("pointerleave", function () { focus(null); });
+    });
+    cards.forEach(function (c, i) {
+      c.addEventListener("pointerenter", function () { focus(i); });
+      c.addEventListener("pointerleave", function () { focus(null); });
+    });
+  }
+
   function explorerLink(bind, base, id) {
     var el = $('[data-bind="' + bind + '"]');
     if (!el) return;
@@ -308,12 +394,12 @@
   /* ── render ──────────────────────────────────────────── */
 
   function render(state) {
-    setStat("feesTotal", sol(state.feesTotal));
+    tweenStat("feesTotal", state.feesTotal, sol);
     setStat("feesRate", "≈ " + sol(FEE_RATE_PER_MIN * 60) + " / hour");
-    setStat("buybackTotal", sol(state.deployed.buyback || 0));
+    tweenStat("buybackTotal", state.deployed.buyback || 0, sol);
     setStat("buybackCount", state.batches.toLocaleString() + " directives executed");
-    setStat("burned", compact(state.burned) + " tokens");
-    setStat("idle", sol(state.idle));
+    tweenStat("burned", state.burned, function (v) { return compact(v) + " tokens"; });
+    tweenStat("idle", state.idle, sol);
 
     var mins = Math.max(0, Math.round((state.nextBatchAt - Date.now()) / 60000));
     setStat("nextAction", "deploys in ~" + mins + " min");
@@ -329,6 +415,41 @@
     var el = $('[data-stat="' + key + '"]');
     if (el && el.textContent !== val) el.textContent = val;
   }
+
+  /* Numbers count up on arrival and ease between refreshes, so a treasury that
+   * is always moving reads as moving rather than as a static figure. */
+  var shown = {};
+
+  function tweenStat(key, target, fmt) {
+    var el = $('[data-stat="' + key + '"]');
+    if (!el) return;
+
+    var motion = !window.ORACLE_FX || window.ORACLE_FX.motion;
+    if (!motion) { el.textContent = fmt(target); shown[key] = target; return; }
+
+    var from = shown[key];
+    if (from == null) from = target * 0.82; // first paint counts up from just below
+    if (Math.abs(target - from) < 1e-9) { el.textContent = fmt(target); return; }
+
+    if (from !== target && shown[key] != null) {
+      el.classList.add("bumped");
+      setTimeout(function () { el.classList.remove("bumped"); }, 700);
+    }
+
+    var start = performance.now();
+    var dur = shown[key] == null ? 1400 : 600;
+    shown[key] = target;
+
+    (function step(now) {
+      var p = Math.min(1, (now - start) / dur);
+      var e = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(from + (target - from) * e);
+      if (p < 1 && shown[key] === target) requestAnimationFrame(step);
+      else if (shown[key] === target) el.textContent = fmt(target);
+    })(start);
+  }
+
+  var chartState = { series: null, drawn: false, geom: null };
 
   function drawChart(series) {
     var svg = $("#chart");
@@ -356,18 +477,127 @@
     }).join("");
 
     var last = series[series.length - 1];
+    var lastX = x(series.length - 1).toFixed(1);
+    var lastY = y(last.fees).toFixed(1);
 
     svg.innerHTML =
-      '<defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="#22d3ee" stop-opacity="0.28"/>' +
+      "<defs>" +
+      '<linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="#22d3ee" stop-opacity="0.30"/>' +
       '<stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>' +
-      "</linearGradient></defs>" +
+      "</linearGradient>" +
+      // cyan throughout: a violet start would read as the violet "bids out" series
+      '<linearGradient id="feeStroke" x1="0" y1="0" x2="1" y2="0">' +
+      '<stop offset="0%" stop-color="#0e7f97"/><stop offset="100%" stop-color="#22d3ee"/>' +
+      "</linearGradient>" +
+      '<filter id="glow" x="-20%" y="-40%" width="140%" height="180%">' +
+      '<feGaussianBlur stdDeviation="3.4" result="b"/>' +
+      '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+      "</filter>" +
+      "</defs>" +
       grid +
-      '<path d="' + area + '" fill="url(#fill)"/>' +
-      '<path d="' + buyLine + '" fill="none" stroke="#7b5cff" stroke-width="2" stroke-linejoin="round"/>' +
-      '<path d="' + feeLine + '" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linejoin="round"/>' +
-      '<circle cx="' + x(series.length - 1).toFixed(1) + '" cy="' + y(last.fees).toFixed(1) +
-      '" r="3.5" fill="#22d3ee"/>';
+      '<path class="area" d="' + area + '" fill="url(#fill)"/>' +
+      '<path class="draw line-buy" d="' + buyLine + '" fill="none" stroke="#7b5cff"' +
+      ' stroke-width="1.6" stroke-linejoin="round" opacity="0.85"/>' +
+      '<path class="draw line-fee" d="' + feeLine + '" fill="none" stroke="url(#feeStroke)"' +
+      ' stroke-width="2.2" stroke-linejoin="round" filter="url(#glow)"/>' +
+      '<g class="cross" opacity="0">' +
+      '<line y1="' + PAD + '" y2="' + (H - PAD) + '" stroke="#3a4160" stroke-width="1" stroke-dasharray="3 4"/>' +
+      '<circle r="4" fill="#22d3ee"/><circle r="3" fill="#7b5cff"/>' +
+      "</g>" +
+      '<circle class="pin" cx="' + lastX + '" cy="' + lastY + '" r="3.5" fill="#22d3ee"/>' +
+      '<circle class="ping" cx="' + lastX + '" cy="' + lastY + '" r="3.5" fill="none" stroke="#22d3ee"/>';
+
+    chartState.series = series;
+    chartState.geom = { x: x, y: y, W: W, H: H, PAD: PAD };
+    animateLines(svg);
+    pingLast(svg);
+    drawAxis(series);
+  }
+
+  // Draw the lines on once, on first paint — replaying it every refresh would
+  // turn a live chart into a flashing one.
+  function animateLines(svg) {
+    if (chartState.drawn || (window.ORACLE_FX && !window.ORACLE_FX.motion)) {
+      $$(".draw", svg).forEach(function (p) { p.classList.remove("draw"); });
+      return;
+    }
+    chartState.drawn = true;
+    $$(".draw", svg).forEach(function (p, i) {
+      var len = p.getTotalLength();
+      p.style.setProperty("--len", len);
+      p.style.animationDelay = i * 220 + "ms";
+      requestAnimationFrame(function () { p.classList.add("go"); });
+    });
+  }
+
+  function pingLast(svg) {
+    var ping = $(".ping", svg);
+    if (!ping || (window.ORACLE_FX && !window.ORACLE_FX.motion)) return;
+    ping.innerHTML =
+      '<animate attributeName="r" from="3.5" to="16" dur="2.4s" repeatCount="indefinite"/>' +
+      '<animate attributeName="opacity" from="0.7" to="0" dur="2.4s" repeatCount="indefinite"/>';
+  }
+
+  function drawAxis(series) {
+    var axis = $("#chartAxis");
+    if (!axis) return;
+    // Clock times are useless here: a 72-hour window sampled at thirds lands on
+    // the same hour of day every time. Label the distance back instead.
+    var last = series[series.length - 1].t;
+    var picks = [0, Math.floor(series.length / 3), Math.floor((2 * series.length) / 3), series.length - 1];
+    axis.innerHTML = picks.map(function (i, n) {
+      if (n === picks.length - 1) return "<span>now</span>";
+      var hrs = Math.round((last - series[i].t) / 3600000);
+      return "<span>−" + hrs + "h</span>";
+    }).join("");
+  }
+
+  /* Crosshair readout: the chart is the only place the two series can be
+   * compared at a point in time, so it should be inspectable. */
+  function wireChartTooltip() {
+    var wrap = $("#chartWrap"), tip = $("#chartTip");
+    if (!wrap || !tip) return;
+
+    function move(e) {
+      var svg = $("#chart");
+      var s = chartState.series, g = chartState.geom;
+      if (!svg || !s || !g) return;
+
+      var r = svg.getBoundingClientRect();
+      var frac = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+      var i = Math.round(frac * (s.length - 1));
+      var p = s[i];
+
+      var cross = $(".cross", svg);
+      if (cross) {
+        var cx = g.x(i);
+        cross.setAttribute("opacity", "1");
+        cross.querySelector("line").setAttribute("x1", cx);
+        cross.querySelector("line").setAttribute("x2", cx);
+        var dots = cross.querySelectorAll("circle");
+        dots[0].setAttribute("cx", cx); dots[0].setAttribute("cy", g.y(p.fees));
+        dots[1].setAttribute("cx", cx); dots[1].setAttribute("cy", g.y(p.deployed));
+      }
+
+      var back = Math.round((s[s.length - 1].t - p.t) / 3600000);
+      tip.innerHTML =
+        '<span class="tip-t">' + (back === 0 ? "now" : "−" + back + "h") + "</span>" +
+        '<span class="tip-fee">' + sol(p.fees) + " collected</span><br>" +
+        '<span class="tip-buy">' + sol(p.deployed) + " deployed</span>";
+      tip.classList.add("on");
+
+      // keep the bubble inside the card instead of letting it hang off an edge
+      var px = (i / (s.length - 1)) * r.width;
+      tip.style.left = Math.min(r.width - 70, Math.max(70, px)) + "px";
+    }
+
+    wrap.addEventListener("pointermove", move);
+    wrap.addEventListener("pointerleave", function () {
+      tip.classList.remove("on");
+      var cross = $(".cross");
+      if (cross) cross.setAttribute("opacity", "0");
+    });
   }
 
   var lastLogKey = "";
@@ -379,15 +609,31 @@
     if (key === lastLogKey) return;
     lastLogKey = key;
 
-    log.innerHTML = items.map(function (d) {
+    log.innerHTML = items.map(function (d, i) {
       return (
-        "<li>" +
+        '<li style="--i:' + Math.min(i, 14) + '">' +
         '<span class="t">' + clock(d.t) + "</span>" +
         '<span class="kind ' + esc(d.kind) + '">' + esc(d.kind) + "</span>" +
         '<span class="msg">' + d.msg + "</span>" +
         "</li>"
       );
     }).join("");
+  }
+
+  /* ── marquee copy ───────────────────────────────────── */
+
+  function marquee() {
+    if (!window.ORACLE_FX || !ORACLE_FX.marquee) return;
+    var mint = (CFG.token && CFG.token.mint) || "";
+    ORACLE_FX.marquee([
+      "<b>" + esc(CFG.entity || "ODYSSEUS") + "</b> is listening",
+      "treasury <b>online</b>",
+      "ca <b>" + esc(shorten(mint)) + "</b>",
+      "every fee routed to the doctrine",
+      "<b>nothing</b> withdrawn",
+      "liquidity added, never removed",
+      "bound to the mast",
+    ]);
   }
 
   /* ── clipboard ───────────────────────────────────────── */
@@ -480,6 +726,9 @@
   });
 
   bindStatic();
+  marquee();
   tick();
+  wireChartTooltip();
+  if (window.ORACLE_FX) ORACLE_FX.start();
   setInterval(tick, (CFG.data && CFG.data.refreshMs) || 6000);
 })();
