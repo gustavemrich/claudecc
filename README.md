@@ -21,7 +21,27 @@ python3 -m http.server 8000
 | `assets/style.css` | All styling |
 | `assets/app.js` | Data layer, chart, ring, directive log, clipboard |
 | `assets/fx.js` | Atmosphere: constellation, boot, reveals, scrambles |
+| `assets/sim.js` | The "Watch It Work" sandbox |
 | `config.js` | **Everything you need to edit** |
+
+## The sandbox
+
+"Watch It Work" (`sim.js`) is a toy model of the doctrine — not a market model,
+and explicitly labelled as not live data. Visitors apply sell pressure or hype
+and watch the entity respond with the same weights `config.doctrine` defines.
+
+It exists to make two laws visible rather than merely stated:
+
+- **Buybacks execute into weakness.** The further price sits below its own
+  moving average, the larger the buyback — funded out of the war chest when the
+  dip is deep enough, which you can watch drain and refill.
+- **Liquidity is added, never removed.** The floor line beneath the price only
+  ever rises, and price cannot settle through it.
+
+It runs only while scrolled into view and never behind a hidden tab. Under
+reduced motion it does not auto-start; the toggle reads "Run" and waits.
+Retuning `config.doctrine` weights changes the sandbox's behaviour too, so the
+model and the stated doctrine cannot drift apart.
 
 ## Motion
 

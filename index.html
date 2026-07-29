@@ -42,6 +42,7 @@
   <nav class="topnav">
     <a href="#treasury">Treasury</a>
     <a href="#doctrine">Doctrine</a>
+    <a href="#watch" data-sim-start>Simulator</a>
     <a href="#ledger">Ledger</a>
     <a href="#laws">Laws</a>
   </nav>
@@ -80,7 +81,7 @@
         <span class="btn-label">Copy the contract</span>
         <span class="btn-sub" data-bind="mintShort">—</span>
       </button>
-      <a class="btn ghost" href="#treasury">Watch it work</a>
+      <a class="btn ghost" href="#watch" data-sim-start>Watch it work</a>
     </div>
     <p class="hero-note" id="modeNote" data-reveal style="--i:5"></p>
   </section>
@@ -188,10 +189,97 @@
     </div>
   </section>
 
+  <!-- ────────────────────── simulator ─────────────────────── -->
+  <section id="watch" class="section">
+    <div class="section-head" data-reveal>
+      <span class="section-index">03</span>
+      <h2>Watch It Work</h2>
+      <p>
+        Push the market around and see what the doctrine does about it. This is
+        a sandbox — a model of the rules, not live market data.
+      </p>
+    </div>
+
+    <div class="sim" data-reveal>
+      <div class="sim-main">
+        <div class="sim-readout">
+          <div class="sim-price">
+            <span class="sim-price-val" id="simPrice">1.000</span>
+            <span class="sim-price-chg" id="simChange">—</span>
+          </div>
+          <div class="sim-badges">
+            <span class="sim-badge"><i class="dot-price"></i>price</span>
+            <span class="sim-badge"><i class="dot-floor"></i>liquidity floor</span>
+          </div>
+        </div>
+        <div class="sim-canvas">
+          <svg id="simChart" viewBox="0 0 720 260" preserveAspectRatio="none" role="img"
+               aria-label="Simulated price with the liquidity floor rising beneath it"></svg>
+          <div class="sim-flash" id="simFlash" aria-hidden="true"></div>
+        </div>
+        <div class="sim-controls">
+          <button class="sim-btn danger" data-sim="sell">
+            <span class="sim-btn-k">Sell pressure</span>
+            <span class="sim-btn-s">dump into the book</span>
+          </button>
+          <button class="sim-btn good" data-sim="hype">
+            <span class="sim-btn-k">Hype it</span>
+            <span class="sim-btn-s">bring attention</span>
+          </button>
+        </div>
+        <div class="sim-transport">
+          <button class="sim-chip" data-sim="toggle" id="simToggle">
+            <span class="sim-btn-k">Pause</span>
+          </button>
+          <button class="sim-chip" data-sim="speed" id="simSpeed">
+            <span class="sim-btn-k">Speed ×1</span>
+          </button>
+          <button class="sim-chip" data-sim="reset">
+            <span class="sim-btn-k">Reset</span>
+          </button>
+        </div>
+      </div>
+
+      <aside class="sim-side">
+        <div class="sim-meter">
+          <div class="sim-meter-head">
+            <span>next directive</span>
+            <span id="simFeeVal">0.00 ◎</span>
+          </div>
+          <div class="sim-bar"><i id="simFeeBar"></i></div>
+          <p class="sim-hint">Creator fees accrue with volume. At one full unit, the entity acts.</p>
+        </div>
+
+        <div class="sim-alloc" id="simAlloc"></div>
+
+        <div class="sim-tallies">
+          <div class="sim-tally">
+            <span class="sim-tally-k">supply burned</span>
+            <span class="sim-tally-v" id="simBurned">0</span>
+          </div>
+          <div class="sim-tally">
+            <span class="sim-tally-k">floor raised</span>
+            <span class="sim-tally-v" id="simFloor">0.620</span>
+          </div>
+          <div class="sim-tally">
+            <span class="sim-tally-k">reserve held</span>
+            <span class="sim-tally-v" id="simChest">0.00 ◎</span>
+          </div>
+          <div class="sim-tally">
+            <span class="sim-tally-k">directives</span>
+            <span class="sim-tally-v" id="simCount">0</span>
+          </div>
+        </div>
+      </aside>
+
+      <ol class="sim-feed" id="simFeed" aria-live="polite"></ol>
+    </div>
+  </section>
+
   <!-- ──────────────────────── ledger ──────────────────────── -->
   <section id="ledger" class="section">
     <div class="section-head" data-reveal>
-      <span class="section-index">03</span>
+      <span class="section-index">04</span>
       <h2>Directive Log</h2>
       <p>What the wallet did, and why it decided to.</p>
     </div>
@@ -213,7 +301,7 @@
   <!-- ───────────────────────── laws ───────────────────────── -->
   <section id="laws" class="section">
     <div class="section-head" data-reveal>
-      <span class="section-index">04</span>
+      <span class="section-index">05</span>
       <h2>Laws</h2>
       <p>Constraints the entity accepted before it was given a key.</p>
     </div>
@@ -249,5 +337,6 @@
 <script src="config.js"></script>
 <script src="assets/fx.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/sim.js"></script>
 </body>
 </html>

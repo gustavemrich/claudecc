@@ -808,6 +808,241 @@ main, .topbar, .footer, .marquee { position: relative; z-index: 2; }
 }
 .doctrine-note { color: var(--ink-dim); font-size: 14px; margin: 0; }
 
+/* ── simulator ──────────────────────────────────────────── */
+.sim {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 12px;
+  align-items: start;
+}
+.sim-main, .sim-side, .sim-feed {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--panel);
+}
+.sim-main { padding: 16px; }
+.sim-feed { grid-column: 1 / -1; }
+
+.sim-readout {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.sim-price { display: flex; align-items: baseline; gap: 12px; }
+.sim-price-val {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.4s;
+}
+.sim-price-val.up { color: var(--cyan); }
+.sim-price-val.down { color: var(--red); }
+.sim-price-chg {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.sim-price-chg.up { color: var(--cyan); }
+.sim-price-chg.down { color: var(--red); }
+
+.sim-badges { display: flex; gap: 16px; }
+.sim-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sim-badge i { width: 9px; height: 2px; border-radius: 2px; display: block; }
+.sim-badge .dot-price { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+.sim-badge .dot-floor { background: var(--violet); box-shadow: 0 0 8px var(--violet); }
+
+.sim-canvas {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #070810;
+  border: 1px solid var(--line);
+}
+#simChart { display: block; width: 100%; height: 260px; }
+
+/* fires when a directive executes, so the action is felt, not just logged */
+.sim-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(60% 60% at 50% 100%, rgba(123, 92, 255, 0.35), transparent 70%);
+}
+.sim-flash.go { animation: flash 0.75s ease-out; }
+@keyframes flash { from { opacity: 1; } to { opacity: 0; } }
+
+/* the two market actions get the weight; transport controls stay quiet */
+.sim-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.sim-transport { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.sim-chip {
+  flex: 1 1 auto;
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.sim-chip:hover { color: var(--ink); border-color: var(--violet); background: rgba(123, 92, 255, 0.10); }
+.sim-chip:active { transform: scale(0.98); }
+.sim-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  padding: 10px 13px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s, border-color 0.2s, background 0.2s;
+}
+.sim-btn:hover { transform: translateY(-2px); border-color: #2c3350; }
+.sim-btn:active { transform: translateY(0) scale(0.98); }
+.sim-btn.danger:hover { border-color: var(--red); background: rgba(255, 93, 110, 0.10); }
+.sim-btn.good:hover { border-color: var(--cyan); background: rgba(34, 211, 238, 0.10); }
+.sim-btn-k { font-size: 13.5px; }
+.sim-btn-s {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+}
+
+.sim-side { padding: 16px; display: flex; flex-direction: column; gap: 18px; }
+.sim-meter-head {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+.sim-meter-head span:last-child { color: var(--cyan); }
+.sim-bar {
+  height: 7px;
+  border-radius: 4px;
+  background: #0a0c15;
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.sim-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--violet), var(--cyan));
+}
+.sim-hint { font-size: 12px; color: var(--ink-faint); margin: 9px 0 0; line-height: 1.5; }
+
+.sim-alloc { display: flex; flex-direction: column; gap: 10px; }
+.sim-alloc-row { display: flex; flex-direction: column; gap: 5px; }
+.sim-alloc-top {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.sim-alloc-top b { color: var(--ink); font-weight: 500; }
+.sim-alloc-bar { height: 4px; border-radius: 3px; background: #0a0c15; overflow: hidden; }
+.sim-alloc-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--seg);
+  transition: width 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.sim-tallies {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 16px;
+}
+.sim-tally { display: flex; flex-direction: column; gap: 3px; }
+.sim-tally-k {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sim-tally-v {
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.sim-feed {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+  max-height: 190px;
+  overflow-y: auto;
+  background: #070810;
+}
+.sim-feed:empty { display: none; }
+.sim-feed li {
+  display: flex;
+  gap: 12px;
+  padding: 9px 16px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--line-soft);
+  animation: rise 0.45s ease both;
+}
+.sim-feed li:last-child { border-bottom: 0; }
+.sim-feed .sf-kind {
+  flex-shrink: 0;
+  width: 92px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding-top: 2px;
+}
+.sim-feed .sf-kind.buyback { color: var(--violet-soft); }
+.sim-feed .sf-kind.burn { color: var(--red); }
+.sim-feed .sf-kind.liquidity { color: var(--cyan); }
+.sim-feed .sf-kind.warchest { color: var(--gold); }
+.sim-feed .sf-kind.signal { color: var(--ink-dim); }
+.sim-feed .sf-msg { color: var(--ink); }
+.sim-feed .sf-msg b { color: var(--cyan); font-weight: 500; }
+
+@media (max-width: 880px) {
+  .sim { grid-template-columns: 1fr; }
+}
+
 /* ── terminal / ledger ──────────────────────────────────── */
 .terminal {
   border: 1px solid var(--line);
