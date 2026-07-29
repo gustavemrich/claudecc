@@ -28,6 +28,11 @@
   var SAMPLE = 0.08;    // sim-seconds between samples
   var BATCH = 1;        // ◎ that must accrue before a directive fires
 
+  // Wall-clock pace. Sampling is measured in sim-seconds, so lowering this
+  // draws the same chart more slowly rather than flattening it: roughly a
+  // directive every 16s at ×1, with the speed control on top.
+  var TEMPO = 0.25;
+
   var S, speed = 1, playing = false, raf = 0, lastT = 0;
 
   function fresh() {
@@ -55,13 +60,20 @@
     S.volume += (1 - S.volume) * Math.min(1, 0.75 * dt);
     S.impulse *= Math.exp(-2.1 * dt);
 
-    var noise = (Math.random() - 0.5) * 0.42 * dt * Math.sqrt(S.volume);
-    S.price = S.price + S.impulse * dt + noise;
+    if (live.on) {
+      // A real price is not ours to push around: follow the feed, and never
+      // clamp it to a floor the model invented.
+      S.price += (live.price - S.price) * Math.min(1, 2.5 * dt);
+      S.impulse = 0;
+    } else {
+      var noise = (Math.random() - 0.5) * 0.42 * dt * Math.sqrt(S.volume);
+      S.price = S.price + S.impulse * dt + noise;
 
-    // the floor is a floor: price cannot settle beneath the liquidity below it
-    if (S.price < S.floor) {
-      S.price = S.floor + (S.price - S.floor) * 0.25;
-      if (S.price < S.floor) S.price = S.floor;
+      // the floor is a floor: price cannot settle beneath the liquidity below it
+      if (S.price < S.floor) {
+        S.price = S.floor + (S.price - S.floor) * 0.25;
+        if (S.price < S.floor) S.price = S.floor;
+      }
     }
     if (S.price < 0.02) S.price = 0.02;
 
@@ -236,7 +248,7 @@
 
   function loop(now) {
     if (!playing) return;
-    var dt = Math.min(0.12, (now - lastT) / 1000) * speed;
+    var dt = Math.min(0.12, (now - lastT) / 1000) * speed * TEMPO;
     lastT = now;
     step(dt);
     draw();
@@ -265,6 +277,52 @@
     for (var i = 0; i < 40; i++) step(SAMPLE); // a little history to draw against
     draw();
     paint();
+  }
+
+  /* ── optional live price ─────────────────────────────── */
+
+  var MKT = CFG.market || {};
+  var live = { on: false, price: 0, base: 0 };
+
+  function dig(obj, path) {
+    return String(path).split(".").reduce(function (o, k) {
+      return o == null ? o : o[k];
+    }, obj);
+  }
+
+  function pollPrice() {
+    var mint = (CFG.token && CFG.token.mint) || "";
+    var url = String(MKT.feed || "").replace("{mint}", mint);
+    if (!url || !mint) return;
+
+    fetch(url, { headers: { accept: "application/json" } })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (json) {
+        var raw = parseFloat(dig(json, MKT.pricePath));
+        if (!isFinite(raw) || raw <= 0) throw new Error("no price at " + MKT.pricePath);
+
+        // The chart is an index, not a dollar figure: the first reading becomes
+        // 1.000 and everything after is measured against it.
+        if (!live.base) live.base = raw;
+        live.price = raw / live.base;
+        live.on = true;
+        mark("live price · doctrine overlay still modelled");
+      })
+      .catch(function (e) {
+        live.on = false;
+        mark("price feed unreachable · running the sandbox model");
+      });
+  }
+
+  function mark(text) {
+    var el = document.getElementById("simSource");
+    if (el) el.textContent = text;
+  }
+
+  function startFeed() {
+    if (MKT.mode !== "live") return;
+    pollPrice();
+    setInterval(pollPrice, Math.max(5000, MKT.pollMs || 20000));
   }
 
   /* ── wiring ──────────────────────────────────────────── */
@@ -304,6 +362,12 @@
       var el = e.target && e.target.closest && e.target.closest("[data-sim]");
       if (!el) return;
       var act = el.getAttribute("data-sim");
+
+      // you cannot move a real market with a button; say so rather than pretend
+      if (live.on && (act === "sell" || act === "hype")) {
+        feed("signal", "Price is live. Nothing on this page moves a real book.");
+        return;
+      }
 
       if (act === "sell") {
         S.impulse -= 1.15;
@@ -350,6 +414,7 @@
     });
 
     reset();
+    startFeed();
     if (!MOTION) els.toggle.querySelector(".sim-btn-k").textContent = "Run";
   }
 

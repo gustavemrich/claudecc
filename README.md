@@ -43,6 +43,41 @@ reduced motion it does not auto-start; the toggle reads "Run" and waits.
 Since the weights come from `config.doctrine`, the sandbox and the treasury
 model cannot drift apart.
 
+Pace is set by `TEMPO` in `sim.js` — roughly one directive every 16 seconds at
+×1, with the speed control multiplying on top. Sampling is measured in
+sim-seconds, so changing `TEMPO` draws the same chart faster or slower rather
+than changing its shape.
+
+### Connecting a real price
+
+`config.market` switches the price line from the model to the real token:
+
+```js
+market: {
+  mode: "live",                                                   // from "sandbox"
+  feed: "https://api.dexscreener.com/latest/dex/tokens/{mint}",   // {mint} is substituted
+  pricePath: "pairs.0.priceUsd",                                  // dot-path into the response
+  pollMs: 20000,
+}
+```
+
+The mint comes from `config.token.mint`, so setting the CA in one place is
+enough. The defaults match Dexscreener's response shape for a Solana mint;
+point `feed`/`pricePath` elsewhere for another provider. There is no backend
+here, so the provider must allow browser requests.
+
+Three things hold in live mode, by design:
+
+- The first reading normalises to `1.000` — the chart is an index of movement
+  since you loaded it, not a dollar price it would be wrong to imply.
+- **Sell pressure** and **Hype it** stop working and say why. A button on a
+  webpage does not move a real order book, and pretending otherwise would be
+  the dishonest version of this feature.
+- The doctrine overlay — floor, burns, reserve — stays modelled, and the label
+  under the heading says so. Only the price becomes real.
+
+If the feed fails, it falls back to the sandbox model and relabels itself.
+
 ## Motion
 
 `fx.js` is decoration only — it owns no state the page depends on, so all of it

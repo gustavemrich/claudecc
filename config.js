@@ -38,6 +38,24 @@ window.ORACLE_CONFIG = {
     refreshMs: 6000,
   },
 
+  /* ---- live market feed (optional) ----
+   * The "Watch It Work" simulator runs as a labelled sandbox until this is
+   * switched on. Set mode to "live" and give it an endpoint that returns the
+   * token's price as JSON, and the price line is driven by the real market
+   * instead of the model — the doctrine overlay (floor, burns, reserve) stays
+   * modelled, and the page says so.
+   *
+   * Defaults below are the Dexscreener shape for a Solana mint:
+   *   https://api.dexscreener.com/latest/dex/tokens/<mint>  ->  pairs[0].priceUsd
+   * `pricePath` is a dot-path into the response; array indexes are numbers.
+   * The provider must allow browser requests — this page has no backend. */
+  market: {
+    mode: "sandbox",
+    feed: "https://api.dexscreener.com/latest/dex/tokens/{mint}",
+    pricePath: "pairs.0.priceUsd",
+    pollMs: 20000,
+  },
+
   /* ---- the doctrine ----
    * How every unit of creator fee is deployed. Must sum to 100. */
   doctrine: [
