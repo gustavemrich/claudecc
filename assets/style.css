@@ -183,6 +183,53 @@ main, .topbar, .footer { position: relative; z-index: 2; }
   margin: 0 0 36px;
 }
 
+/* the contract address, given the prominence it is actually looked for with */
+.ca-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 640px;
+  margin: 0 0 20px;
+  padding: 11px 14px;
+  border: 1px solid rgba(123, 92, 255, 0.35);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(123, 92, 255, 0.10), rgba(34, 211, 238, 0.05));
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.ca-bar:hover, .ca-bar:focus-visible {
+  border-color: var(--violet);
+  background: linear-gradient(90deg, rgba(123, 92, 255, 0.18), rgba(34, 211, 238, 0.08));
+  outline: none;
+}
+.ca-tag {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  color: var(--violet-soft);
+  border-right: 1px solid var(--line);
+  padding-right: 12px;
+}
+.ca-bar code {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ca-copy {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.ca-bar:hover .ca-copy { color: var(--cyan); }
+
 .cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
 
 .btn {
@@ -251,7 +298,7 @@ main, .topbar, .footer { position: relative; z-index: 2; }
     linear-gradient(180deg, rgba(123, 92, 255, 0.07), transparent 55%),
     var(--panel);
   padding: 20px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 .wallet-head {
   display: flex;
@@ -312,7 +359,7 @@ main, .topbar, .footer { position: relative; z-index: 2; }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 12px;
-  margin-bottom: 20px;
+  margin: 20px 0;
 }
 .stat {
   display: flex;

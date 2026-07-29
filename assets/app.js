@@ -223,6 +223,7 @@
 
   function bindStatic() {
     var wallet = (CFG.wallet && CFG.wallet.address) || "";
+    var mint = (CFG.token && CFG.token.mint) || "";
     var map = {
       entity: CFG.entity,
       tagline: CFG.tagline,
@@ -230,6 +231,8 @@
       chain: CFG.chain,
       walletFull: wallet,
       walletShort: shorten(wallet),
+      mintFull: mint,
+      mintShort: shorten(mint),
     };
     Object.keys(map).forEach(function (k) {
       if (map[k] == null) return;
@@ -238,12 +241,8 @@
 
     if (CFG.entity) document.title = CFG.entity + " — an autonomous treasury";
 
-    var link = $('[data-bind="explorerLink"]');
-    if (link) {
-      var base = (CFG.wallet && CFG.wallet.explorer) || "";
-      if (base && wallet) link.href = base + wallet;
-      else link.style.display = "none";
-    }
+    explorerLink("explorerLink", (CFG.wallet && CFG.wallet.explorer) || "", wallet);
+    explorerLink("mintLink", (CFG.token && CFG.token.explorer) || "", mint);
 
     // doctrine cards
     var grid = $("#doctrineGrid");
@@ -291,6 +290,13 @@
         ? "Figures read live from the treasury. Verify them on-chain."
         : "<b>Simulated telemetry</b> — this deployment is not yet wired to a live wallet. Numbers below are a model, not a balance.";
     }
+  }
+
+  function explorerLink(bind, base, id) {
+    var el = $('[data-bind="' + bind + '"]');
+    if (!el) return;
+    if (base && id) el.href = base + id;
+    else el.style.display = "none";
   }
 
   function esc(s) {
@@ -395,14 +401,19 @@
     toast._id = setTimeout(function () { t.classList.remove("show"); }, 2200);
   }
 
-  function copyWallet() {
-    var addr = (CFG.wallet && CFG.wallet.address) || "";
-    if (!addr) return;
-    var done = function () { toast("address copied — go verify it"); };
+  function copy(what) {
+    var value = what === "mint"
+      ? (CFG.token && CFG.token.mint) || ""
+      : (CFG.wallet && CFG.wallet.address) || "";
+    if (!value) return;
+
+    var done = function () {
+      toast(what === "mint" ? "contract copied — check it matches" : "wallet copied — go verify it");
+    };
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(addr).then(done, function () { fallbackCopy(addr, done); });
+      navigator.clipboard.writeText(value).then(done, function () { fallbackCopy(value, done); });
     } else {
-      fallbackCopy(addr, done);
+      fallbackCopy(value, done);
     }
   }
 
@@ -457,8 +468,15 @@
   }
 
   document.addEventListener("click", function (e) {
-    var el = e.target.closest("[data-copy-wallet]");
-    if (el) { e.preventDefault(); copyWallet(); }
+    var el = e.target && e.target.closest && e.target.closest("[data-copy]");
+    if (el) { e.preventDefault(); copy(el.getAttribute("data-copy")); }
+  });
+
+  // the CA bar is a div, so it needs the keyboard affordance a button gets free
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var el = e.target && e.target.closest && e.target.closest('.ca-bar[data-copy]');
+    if (el) { e.preventDefault(); copy(el.getAttribute("data-copy")); }
   });
 
   bindStatic();

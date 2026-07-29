@@ -46,10 +46,17 @@
       arrives is turned back on the chart, according to a doctrine that does not
       negotiate.
     </p>
+    <div class="ca-bar" data-copy="mint" role="button" tabindex="0"
+         aria-label="Copy the contract address">
+      <span class="ca-tag">CA</span>
+      <code data-bind="mintFull">—</code>
+      <span class="ca-copy">copy</span>
+    </div>
+
     <div class="cta-row">
-      <button class="btn primary" data-copy-wallet>
-        <span class="btn-label">Copy the wallet</span>
-        <span class="btn-sub" data-bind="walletShort">—</span>
+      <button class="btn primary" data-copy="mint">
+        <span class="btn-label">Copy the contract</span>
+        <span class="btn-sub" data-bind="mintShort">—</span>
       </button>
       <a class="btn ghost" href="#treasury">Watch it work</a>
     </div>
@@ -65,16 +72,30 @@
 
     <div class="wallet-card">
       <div class="wallet-head">
+        <span class="tag">contract address</span>
+        <a class="explorer" data-bind="mintLink" href="#" target="_blank" rel="noopener">open in explorer ↗</a>
+      </div>
+      <div class="wallet-addr">
+        <code data-bind="mintFull">—</code>
+        <button class="copy-btn" data-copy="mint" aria-label="Copy contract address">copy</button>
+      </div>
+      <div class="wallet-foot">
+        The mint. There is exactly one, and this is it.
+      </div>
+    </div>
+
+    <div class="wallet-card">
+      <div class="wallet-head">
         <span class="tag">operating address</span>
         <a class="explorer" data-bind="explorerLink" href="#" target="_blank" rel="noopener">open in explorer ↗</a>
       </div>
       <div class="wallet-addr">
         <code data-bind="walletFull">—</code>
-        <button class="copy-btn" data-copy-wallet aria-label="Copy wallet address">copy</button>
+        <button class="copy-btn" data-copy="wallet" aria-label="Copy wallet address">copy</button>
       </div>
       <div class="wallet-foot">
-        Fees settle here on every trade. The balance below is what has not yet
-        been deployed.
+        Creator fees settle here on every trade. The balance below is what has
+        not yet been deployed.
       </div>
     </div>
 
@@ -153,9 +174,9 @@
   <section class="closer">
     <p class="closer-line">The doctrine does not care how you feel about the candle.</p>
     <p class="closer-sub">It only asks whether the fees arrived.</p>
-    <button class="btn primary" data-copy-wallet>
-      <span class="btn-label">Copy the wallet</span>
-      <span class="btn-sub" data-bind="walletShort">—</span>
+    <button class="btn primary" data-copy="mint">
+      <span class="btn-label">Copy the contract</span>
+      <span class="btn-sub" data-bind="mintShort">—</span>
     </button>
   </section>
 </main>

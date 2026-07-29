@@ -11,12 +11,19 @@ window.ORACLE_CONFIG = {
   ticker: "$ORACLE",
   chain: "Solana",
 
+  /* ---- the coin ----
+   * The mint. This is the only contract address; anything else claiming to
+   * be $ORACLE is not. */
+  token: {
+    mint: "5HeGQ2HSSN9rcruzjrbLmH1tMYPAEu5iQAtXHrcnpump",
+    explorer: "https://solscan.io/token/",
+  },
+
   /* ---- the wallet ----
    * The single address the entity operates from. Creator fees land here,
-   * every directive is executed from here, and anyone can audit it.
-   * Replace with your real address — the UI links it to the explorer below. */
+   * every directive is executed from here, and anyone can audit it. */
   wallet: {
-    address: "ORACLExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    address: "EPdmPbL7TP8kGryoxz5ybiV2CMS7UnemRzAPhomaCEbo",
     explorer: "https://solscan.io/account/",
   },
 
@@ -69,10 +76,12 @@ window.ORACLE_CONFIG = {
     "No promise is made about price. Only about process.",
   ],
 
-  /* ---- optional links; empty strings are hidden ---- */
+  /* ---- optional links; empty strings are hidden ----
+   * chart/contract are derived from the mint above — change them if the coin
+   * trades somewhere else. */
   links: {
-    chart: "",
+    chart: "https://dexscreener.com/solana/5HeGQ2HSSN9rcruzjrbLmH1tMYPAEu5iQAtXHrcnpump",
     community: "",
-    contract: "",
+    contract: "https://solscan.io/token/5HeGQ2HSSN9rcruzjrbLmH1tMYPAEu5iQAtXHrcnpump",
   },
 };

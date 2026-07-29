@@ -23,18 +23,25 @@ python3 -m http.server 8000
 
 ## Configuring
 
-`config.js` drives the whole page — entity name, ticker, chain, wallet
-address, explorer, doctrine weights, and the laws list. Change it and reload;
-nothing else needs touching.
+`config.js` drives the whole page — entity name, ticker, chain, addresses,
+doctrine weights, and the laws list. Change it and reload; nothing else needs
+touching.
 
-The one field to get right before you deploy:
+The two addresses it is built around:
 
 ```js
-wallet: {
-  address: "your-real-treasury-address",
-  explorer: "https://solscan.io/account/",
-}
+token:  { mint: "5HeG…pump",  explorer: "https://solscan.io/token/" },
+wallet: { address: "EPdm…CEbo", explorer: "https://solscan.io/account/" },
 ```
+
+The mint appears three times — the hero CA bar, the primary button, and its own
+card in the Treasury section — because a contract address is the thing visitors
+arrive looking for. The wallet is the operating address: where creator fees
+land and where every directive executes from. Both are copyable and linked to
+the explorer so anyone can check them.
+
+`links.chart` and `links.contract` are derived from the mint (Dexscreener and
+Solscan). Repoint them if the coin trades somewhere else.
 
 `doctrine[].weight` values should sum to 100 — they drive the percentages, the
 progress bars, and how the simulated directive log allocates each batch.
@@ -84,7 +91,11 @@ signing, and no write path — it reads and renders, nothing more.
 
 ## Before going live
 
-- Replace the placeholder wallet address in `config.js`.
-- Switch `data.mode` to `"live"` and stand up the endpoint, or keep the
-  simulated label visible.
+The mint and the operating wallet are real. The treasury figures are not — they
+come from the simulated model described above. That combination is the one to
+watch: a real address next to modelled numbers reads as a real balance unless
+the page says otherwise, which is why the label exists.
+
+- Stand up an endpoint and switch `data.mode` to `"live"`, or leave the
+  simulated label exactly where it is.
 - Keep the footer disclaimer. It is accurate.
