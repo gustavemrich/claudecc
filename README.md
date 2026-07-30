@@ -79,6 +79,18 @@ Three things hold in live mode, by design:
 
 If the feed fails, it falls back to the sandbox model and relabels itself.
 
+## Palette
+
+Three accents on near-black: violet (`--violet`) for the entity's own actions,
+cyan (`--cyan`) for what it reads from the market, and ember (`--ember`) for
+heat — burns, held reserve, the modelled-data warnings, section numbering, and
+the corona around the hero core. Surfaces run `--void` → `--panel` → `--sunk`,
+darkest for terminals and input wells.
+
+`--ink-faint` is the floor for readable text at 4.5:1 on every surface; the
+small uppercase mono labels use it, so do not darken it without re-checking.
+Only `--copy` and the boot hint sit below that, and neither carries meaning.
+
 ## Motion
 
 `fx.js` is decoration only — it owns no state the page depends on, so all of it

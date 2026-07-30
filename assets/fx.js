@@ -41,7 +41,7 @@ window.ORACLE_FX = (function () {
           vx: (Math.random() - 0.5) * 0.22,
           vy: (Math.random() - 0.5) * 0.22,
           r: Math.random() * 1.4 + 0.6,
-          cyan: Math.random() < 0.3,
+          tone: Math.random() < 0.28 ? "cyan" : (Math.random() < 0.16 ? "ember" : "violet"),
         });
       }
     }
@@ -72,7 +72,8 @@ window.ORACLE_FX = (function () {
 
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.r, 0, 6.2832);
-        ctx.fillStyle = n.cyan ? "rgba(34,211,238,0.55)" : "rgba(167,139,255,0.45)";
+        ctx.fillStyle = n.tone === "cyan" ? "rgba(34,211,238,0.55)"
+          : n.tone === "ember" ? "rgba(255,138,60,0.55)" : "rgba(167,139,255,0.45)";
         ctx.fill();
       }
 
@@ -317,7 +318,7 @@ window.ORACLE_FX = (function () {
           sp: (0.10 + Math.random() * 0.45) * (Math.random() < 0.3 ? -1 : 1),
           tilt: 0.24 + Math.random() * 0.5,
           size: 0.7 + Math.random() * 1.7,
-          cyan: Math.random() < 0.42,
+          tone: Math.random() < 0.4 ? "cyan" : (Math.random() < 0.3 ? "ember" : "violet"),
         });
       }
     }
@@ -340,8 +341,10 @@ window.ORACLE_FX = (function () {
 
         ctx.beginPath();
         ctx.arc(x, y, b.size * (0.55 + depth * 0.7), 0, 6.2832);
-        ctx.fillStyle = b.cyan
+        ctx.fillStyle = b.tone === "cyan"
           ? "rgba(34,211,238," + (0.14 + depth * 0.5).toFixed(3) + ")"
+          : b.tone === "ember"
+          ? "rgba(255,138,60," + (0.16 + depth * 0.55).toFixed(3) + ")"
           : "rgba(167,139,255," + (0.12 + depth * 0.45).toFixed(3) + ")";
         ctx.fill();
 
@@ -350,8 +353,10 @@ window.ORACLE_FX = (function () {
         ctx.moveTo(x, y);
         var pa = b.a - b.sp * 0.09;
         ctx.lineTo(cx + Math.cos(pa) * b.r + lean.x, cy + Math.sin(pa) * b.r * b.tilt + lean.y);
-        ctx.strokeStyle = b.cyan
+        ctx.strokeStyle = b.tone === "cyan"
           ? "rgba(34,211,238," + (0.06 + depth * 0.16).toFixed(3) + ")"
+          : b.tone === "ember"
+          ? "rgba(255,138,60," + (0.07 + depth * 0.18).toFixed(3) + ")"
           : "rgba(167,139,255," + (0.05 + depth * 0.14).toFixed(3) + ")";
         ctx.lineWidth = b.size * 0.7;
         ctx.stroke();
@@ -444,6 +449,14 @@ window.ORACLE_FX = (function () {
     document.addEventListener("pointermove", function (e) {
       var el = e.target && e.target.closest && e.target.closest("[data-spotlight]");
       if (!el) return;
+
+      // A tilting card moves its own buttons out from under the cursor, which
+      // turns a deliberate click into a miss. Sit flat while a control is aimed at.
+      if (e.target.closest("button, a, input, textarea, [role='button']")) {
+        el.style.transform = "";
+        return;
+      }
+
       var r = el.getBoundingClientRect();
       var dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
       var dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);

@@ -22,7 +22,7 @@
   if (!root || !DOCTRINE.length) return;
 
   var MOTION = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var SEG = { buyback: "#7b5cff", liquidity: "#22d3ee", warchest: "#ffb547", signal: "#5b6180" };
+  var SEG = { buyback: "#7b5cff", liquidity: "#22d3ee", warchest: "#ff8a3c", signal: "#5b6180" };
 
   var POINTS = 170;     // samples kept on screen
   var SAMPLE = 0.08;    // sim-seconds between samples
