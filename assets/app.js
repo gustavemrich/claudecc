@@ -176,6 +176,25 @@
   function bindStatic() {
     var wallet = (CFG.wallet && CFG.wallet.address) || "";
     var mint = (CFG.token && CFG.token.mint) || "";
+    var pending = (CFG.token && CFG.token.pending) || "coming soon";
+
+    // Everything CA-shaped keys off whether a mint exists, so dropping the
+    // real address into config.js flips the whole page out of its waiting state.
+    document.body.classList.toggle("no-mint", !mint);
+    $$("[data-when]").forEach(function (el) {
+      var want = el.getAttribute("data-when");
+      el.style.display = (want === "mint") === !!mint ? "" : "none";
+    });
+
+    var bar = $("#caBar");
+    if (bar) {
+      bar.classList.toggle("pending", !mint);
+      if (!mint) {
+        bar.setAttribute("aria-label", "Contract address not published yet");
+        bar.querySelector(".ca-copy").textContent = "watch X";
+      }
+    }
+
     var map = {
       entity: CFG.entity,
       tagline: CFG.tagline,
@@ -183,8 +202,9 @@
       chain: CFG.chain,
       walletFull: wallet,
       walletShort: shorten(wallet),
-      mintFull: mint,
-      mintShort: shorten(mint),
+      mintFull: mint || pending,
+      mintShort: mint ? shorten(mint) : pending,
+      handle: (CFG.social && CFG.social.handle) || "",
     };
     Object.keys(map).forEach(function (k) {
       if (map[k] == null) return;
@@ -196,6 +216,12 @@
     explorerLink("explorerLink", (CFG.wallet && CFG.wallet.explorer) || "", wallet);
     explorerLink("mintLink", (CFG.token && CFG.token.explorer) || "", mint);
 
+    var x = (CFG.social && CFG.social.x) || "";
+    $$('[data-bind="xLink"]').forEach(function (el) {
+      if (x) el.href = x;
+      else el.style.display = "none";
+    });
+
     // laws — note the id, not #laws: that one belongs to the <section>
     var laws = $("#lawsList");
     if (laws) {
@@ -204,11 +230,23 @@
       }).join("");
     }
 
+    // With a mint set, the chart and contract links follow from it — so the
+    // only thing to edit when the CA lands is still config.token.mint.
+    var links = CFG.links || (CFG.links = {});
+    if (mint) {
+      if (!links.chart) links.chart = "https://dexscreener.com/solana/" + mint;
+      if (!links.contract) links.contract = ((CFG.token && CFG.token.explorer) || "") + mint;
+    }
+
     // footer links
     var foot = $("#footLinks");
     if (foot) {
       var labels = { chart: "Chart ↗", community: "Community ↗", contract: "Contract ↗" };
-      foot.innerHTML = Object.keys(CFG.links || {})
+      var social = (CFG.social && CFG.social.x)
+        ? '<a href="' + esc(CFG.social.x) + '" target="_blank" rel="noopener">' +
+          esc((CFG.social.handle || "X") + " ↗") + "</a>"
+        : "";
+      foot.innerHTML = social + Object.keys(CFG.links || {})
         .filter(function (k) { return CFG.links[k]; })
         .map(function (k) {
           return '<a href="' + esc(CFG.links[k]) + '" target="_blank" rel="noopener">' +
@@ -219,9 +257,12 @@
 
     var note = $("#modeNote");
     if (note) {
+      // The claim has to match what is actually on the page: with no mint
+      // published, only the operating wallet is checkable.
+      var real = mint ? "the addresses above are" : "the operating wallet above is";
       note.innerHTML = (CFG.data && CFG.data.mode === "live")
         ? "Directives read live from the treasury. Verify them on-chain."
-        : "<b>Modelled</b> — the addresses above are real and checkable. The stream, the ledger and the simulator are a model of the process, not a record of one.";
+        : "<b>Modelled</b> — " + real + " real and checkable. The stream, the ledger and the simulator are a model of the process, not a record of one.";
     }
   }
 
@@ -272,11 +313,13 @@
   function marquee() {
     if (!window.ORACLE_FX || !ORACLE_FX.marquee) return;
     var mint = (CFG.token && CFG.token.mint) || "";
+    var handle = (CFG.social && CFG.social.handle) || "";
     ORACLE_FX.marquee([
       "<b>" + esc(CFG.entity || "ODYSSEUS") + "</b> is listening",
       "treasury <b>online</b>",
-      "ca <b>" + esc(shorten(mint)) + "</b>",
-      "every fee routed to the doctrine",
+      mint ? "ca <b>" + esc(shorten(mint)) + "</b>"
+           : "ca <b>" + esc((CFG.token && CFG.token.pending) || "coming soon") + "</b>",
+      handle ? "follow <b>" + esc(handle) + "</b>" : "every fee routed to the doctrine",
       "<b>nothing</b> withdrawn",
       "liquidity added, never removed",
       "bound to the mast",
@@ -298,7 +341,13 @@
     var value = what === "mint"
       ? (CFG.token && CFG.token.mint) || ""
       : (CFG.wallet && CFG.wallet.address) || "";
-    if (!value) return;
+
+    if (!value) {
+      // nothing to copy yet — point at the place the address will appear
+      var handle = (CFG.social && CFG.social.handle) || "X";
+      toast("no contract yet — " + handle + " announces it");
+      return;
+    }
 
     var done = function () {
       toast(what === "mint" ? "contract copied — check it matches" : "wallet copied — go verify it");
@@ -350,7 +399,14 @@
 
   document.addEventListener("click", function (e) {
     var el = e.target && e.target.closest && e.target.closest("[data-copy]");
-    if (el) { e.preventDefault(); copy(el.getAttribute("data-copy")); }
+    if (!el) return;
+    e.preventDefault();
+
+    var bar = el.classList.contains("ca-bar") && el.classList.contains("pending");
+    var x = (CFG.social && CFG.social.x) || "";
+    if (bar && x) { window.open(x, "_blank", "noopener"); return; }
+
+    copy(el.getAttribute("data-copy"));
   });
 
   // the CA bar is a div, so it needs the keyboard affordance a button gets free

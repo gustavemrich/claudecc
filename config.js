@@ -13,10 +13,22 @@ window.ORACLE_CONFIG = {
 
   /* ---- the coin ----
    * The mint. This is the only contract address; anything else claiming to
-   * be $ODYSSEUS is not. */
+   * be $ODYSSEUS is not.
+   *
+   * Leave `mint` empty until it is live and the page switches itself to a
+   * "coming soon" state: the CA slots stop offering a copy, the explorer links
+   * hide, and the primary button points at X instead. Fill it in and every one
+   * of those flips back on its own — nothing else to edit. */
   token: {
-    mint: "7Urjb7cvHyPmyS1pu836aYAKwb73Zto9ePP1kajcpump",
+    mint: "",
+    pending: "coming soon",
     explorer: "https://solscan.io/token/",
+  },
+
+  /* ---- where the drop gets announced ---- */
+  social: {
+    x: "https://x.com/odysseuspf",
+    handle: "@odysseuspf",
   },
 
   /* ---- the wallet ----
@@ -96,11 +108,11 @@ window.ORACLE_CONFIG = {
   ],
 
   /* ---- optional links; empty strings are hidden ----
-   * chart/contract are derived from the mint above — change them if the coin
-   * trades somewhere else. */
+   * Leave chart/contract empty while the mint is pending — app.js derives both
+   * from the mint automatically once it is set. */
   links: {
-    chart: "https://dexscreener.com/solana/7Urjb7cvHyPmyS1pu836aYAKwb73Zto9ePP1kajcpump",
+    chart: "",
     community: "",
-    contract: "https://solscan.io/token/7Urjb7cvHyPmyS1pu836aYAKwb73Zto9ePP1kajcpump",
+    contract: "",
   },
 };

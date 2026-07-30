@@ -120,18 +120,36 @@ touching.
 The two addresses it is built around:
 
 ```js
-token:  { mint: "7Urj…pump",  explorer: "https://solscan.io/token/" },
+token:  { mint: "", pending: "coming soon", explorer: "https://solscan.io/token/" },
 wallet: { address: "EPdm…CEbo", explorer: "https://solscan.io/account/" },
+social: { x: "https://x.com/odysseuspf", handle: "@odysseuspf" },
 ```
 
-The mint appears three times — the hero CA bar, the primary button, and its own
-card in the Treasury section — because a contract address is the thing visitors
-arrive looking for. The wallet is the operating address: where creator fees
-land and where every directive executes from. Both are copyable and linked to
-the explorer so anyone can check them.
+The mint appears in the hero CA bar and in its own Treasury card, because a
+contract address is the thing visitors arrive looking for. The wallet is the
+operating address: where creator fees land and where every directive executes
+from.
 
-`links.chart` and `links.contract` are derived from the mint (Dexscreener and
-Solscan). Repoint them if the coin trades somewhere else.
+### Waiting on the mint
+
+`token.mint` is empty until the coin is live, and the page reads that as a
+state rather than as missing data:
+
+- both CA slots show `token.pending` in ember and stop offering a copy; the
+  hero bar links to X instead and its hint reads "watch X"
+- the primary CTA in the hero and the closer becomes **Follow on X**
+- the mint's explorer link hides, and the Treasury card explains that the
+  address will appear here and on X at the same moment
+- the marquee, the hero disclaimer and the agent's `read_book` argument all
+  say pending rather than inventing an address
+
+Fill `token.mint` in and every one of those flips back on its own — the copy
+buttons return, the explorer link appears, and `links.chart` / `links.contract`
+are derived from the mint (Dexscreener and Solscan) unless you set them
+yourself. Setting the CA is a one-line change; nothing else needs editing.
+
+`social.x` drives the nav link, the footer, the CTAs and the pending copy. It
+is the only place the handle is written down.
 
 `doctrine[].weight` values should sum to 100. They have no section of their
 own on the page any more, but they still drive real behaviour: how the

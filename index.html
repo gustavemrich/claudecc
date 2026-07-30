@@ -45,6 +45,7 @@
     <a href="#watch" data-sim-start>Simulator</a>
     <a href="#ledger">Ledger</a>
     <a href="#laws">Laws</a>
+    <a class="nav-x" data-bind="xLink" href="#" target="_blank" rel="noopener">X ↗</a>
   </nav>
   <span class="pulse" id="statusPill"><i></i><span>listening</span></span>
 </header>
@@ -76,7 +77,7 @@
       negotiate.
     </p>
 
-    <div class="ca-bar" data-copy="mint" role="button" tabindex="0"
+    <div class="ca-bar" id="caBar" data-copy="mint" role="button" tabindex="0"
          data-reveal style="--i:3" aria-label="Copy the contract address">
       <span class="ca-tag">CA</span>
       <code data-bind="mintFull">—</code>
@@ -84,10 +85,15 @@
     </div>
 
     <div class="cta-row" data-reveal style="--i:4">
-      <button class="btn primary" data-copy="mint">
+      <button class="btn primary" data-when="mint" data-copy="mint">
         <span class="btn-label">Copy the contract</span>
         <span class="btn-sub" data-bind="mintShort">—</span>
       </button>
+      <a class="btn primary" data-when="no-mint" data-bind="xLink" href="#"
+         target="_blank" rel="noopener">
+        <span class="btn-label">Follow on X</span>
+        <span class="btn-sub" data-bind="handle">—</span>
+      </a>
       <a class="btn ghost" href="#watch" data-sim-start>Watch it work</a>
     </div>
     <p class="hero-note" id="modeNote" data-reveal style="--i:5"></p>
@@ -115,8 +121,13 @@
         <code data-bind="mintFull">—</code>
         <button class="copy-btn" data-copy="mint" aria-label="Copy contract address">copy</button>
       </div>
-      <div class="wallet-foot">
+      <div class="wallet-foot" data-when="mint">
         The mint. There is exactly one, and this is it.
+      </div>
+      <div class="wallet-foot" data-when="no-mint">
+        Not live yet. When it is, the address appears here and on
+        <a data-bind="xLink" href="#" target="_blank" rel="noopener">X</a> at the
+        same moment — anything circulating before then is not this coin.
       </div>
     </div>
 
@@ -318,10 +329,15 @@
     <p class="closer-line" data-reveal>The doctrine does not care how you feel about the candle.</p>
     <p class="closer-sub" data-reveal style="--i:1">It only asks whether the fees arrived.</p>
     <div data-reveal style="--i:2">
-      <button class="btn primary" data-copy="mint">
+      <button class="btn primary" data-when="mint" data-copy="mint">
         <span class="btn-label">Copy the contract</span>
         <span class="btn-sub" data-bind="mintShort">—</span>
       </button>
+      <a class="btn primary" data-when="no-mint" data-bind="xLink" href="#"
+         target="_blank" rel="noopener">
+        <span class="btn-label">Follow on X</span>
+        <span class="btn-sub" data-bind="handle">—</span>
+      </a>
     </div>
   </section>
 </main>

@@ -19,7 +19,7 @@
 
   var MOTION = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var MINT = (CFG.token && CFG.token.mint) || "";
-  var SHORT = MINT ? MINT.slice(0, 4) + "…" + MINT.slice(-4) : "mint";
+  var SHORT = MINT ? MINT.slice(0, 4) + "…" + MINT.slice(-4) : "pending";
   var DOCTRINE = CFG.doctrine || [];
 
   function weightOf(key) {
