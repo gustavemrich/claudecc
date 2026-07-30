@@ -19,9 +19,10 @@ python3 -m http.server 8000
 | --- | --- |
 | `index.html` | Page structure |
 | `assets/style.css` | All styling |
-| `assets/app.js` | Data layer, chart, directive log, clipboard |
-| `assets/fx.js` | Atmosphere: constellation, boot, reveals, scrambles |
+| `assets/app.js` | Config binding, directive log, clipboard |
+| `assets/fx.js` | Atmosphere: core, constellation, boot, reveals, cursor |
 | `assets/sim.js` | The "Watch It Work" sandbox |
+| `assets/agent.js` | "The Mind" — the live cognition stream |
 | `config.js` | **Everything you need to edit** |
 
 ## The sandbox
@@ -81,9 +82,18 @@ If the feed fails, it falls back to the sandbox model and relabels itself.
 ## Motion
 
 `fx.js` is decoration only — it owns no state the page depends on, so all of it
-is safe to drop. Under `prefers-reduced-motion: reduce` the boot sequence is
-skipped, the canvas is removed, counters jump to their final values, and every
+is safe to drop. It carries the hero core (orbiting particles that lean toward
+the pointer), the constellation, the pointer ring, magnetic buttons, card tilt,
+word-by-word headings and the travelling edge-light on live panels.
+
+Under `prefers-reduced-motion: reduce` the boot sequence is skipped, the core
+and constellation and pointer ring are removed, the edge-lights stop, and every
 reveal starts visible. Verify changes in both modes.
+
+The core hangs off the right edge of the hero on purpose. `.hero` uses
+`overflow-x: clip` to contain it — `body { overflow-x: hidden }` alone does not
+stop the document widening, which is how it first shipped a horizontal
+scrollbar on phones.
 
 The boot sequence runs once per session (`sessionStorage`), is click- or
 key-skippable, and force-closes after 4.2s so a stalled animation can never
@@ -120,33 +130,19 @@ sandbox's allocation bars. Changing a weight changes all three.
 
 `config.data.mode` selects where the numbers come from.
 
-**`"simulated"` (default).** A deterministic local model: fee inflow accrues on
-an hourly batch cadence, splits by doctrine weight, and generates a plausible
+**`"simulated"` (default).** A deterministic local model: fees accrue on an
+hourly batch cadence, split by doctrine weight, and generate a plausible
 directive log. Genesis is anchored 34 days behind the current UTC day, so the
-entity always reads as a young coin instead of drifting into absurd lifetime
-totals. Same numbers on every machine, and they move through the day. The hero carries a visible **"Simulated telemetry"** label
-in this mode — leave that label intact for as long as the mode is on. Presenting
-modelled treasury figures as a real balance is the one thing this page must
-never do.
+entity always reads as a young coin. Same log on every machine, moving through
+the day. The hero carries a visible **"Modelled"** label in this mode — leave
+it intact for as long as the mode is on.
 
 **`"live"`.** `app.js` polls `config.data.endpoint` every `refreshMs` and
-renders whatever comes back. Any missing field degrades to zero rather than
-blanking the page. Expected shape:
+fills the directive log from it. A missing field degrades to an empty log
+rather than blanking the page. Expected shape:
 
 ```jsonc
 {
-  "feesTotal": 412.8,                       // ◎ collected, all time
-  "deployed": {                             // keyed by doctrine[].key
-    "buyback": 198.4, "liquidity": 99.2,
-    "warchest": 59.5, "signal": 39.7
-  },
-  "burned": 47200000,                       // tokens removed from supply
-  "idle": 16.0,                             // in the wallet, not yet deployed
-  "batches": 1204,                          // directives executed, all time
-  "nextBatchAt": 1767830400000,             // epoch ms of the next deployment
-  "series": [                               // oldest → newest, ~72 points
-    { "t": 1767744000000, "fees": 380.1, "deployed": 372.0 }
-  ],
   "directives": [                           // newest first
     { "t": 1767830000000, "kind": "buyback", "msg": "Bid placed into thin books." }
   ]
@@ -162,11 +158,14 @@ signing, and no write path — it reads and renders, nothing more.
 
 ## Before going live
 
-The mint and the operating wallet are real. The treasury figures are not — they
-come from the simulated model described above. That combination is the one to
-watch: a real address next to modelled numbers reads as a real balance unless
-the page says otherwise, which is why the label exists.
+The mint and the operating wallet are real and checkable. Everything else —
+the cognition stream, the directive log, the sandbox — is a model of the
+process, and the hero label says so.
 
-- Stand up an endpoint and switch `data.mode` to `"live"`, or leave the
-  simulated label exactly where it is.
+The page deliberately reports **no balances and no totals**. Anyone who wants a
+number can open the wallet in an explorer, where it is true. If you add figures
+back, add the caveat back with them.
+
+- Stand up an endpoint and switch `data.mode` to `"live"` to make the ledger
+  real, or leave the modelled label exactly where it is.
 - Keep the footer disclaimer. It is accurate.

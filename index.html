@@ -53,6 +53,13 @@
 
   <!-- ───────────────────────── hero ───────────────────────── -->
   <section class="hero">
+    <div class="core" aria-hidden="true">
+      <canvas id="coreCanvas"></canvas>
+      <div class="core-ring r1"></div>
+      <div class="core-ring r2"></div>
+      <div class="core-ring r3"></div>
+      <div class="core-eye"></div>
+    </div>
     <p class="eyebrow" data-reveal style="--i:0">
       <span data-bind="chain">Solana</span>
       <span class="dot">·</span>
@@ -123,49 +130,11 @@
         <button class="copy-btn" data-copy="wallet" aria-label="Copy wallet address">copy</button>
       </div>
       <div class="wallet-foot">
-        Creator fees settle here on every trade. The balance below is what has
-        not yet been deployed.
+        Creator fees settle here on every trade, and every directive is signed
+        from here. Open it in the explorer and check the balance yourself —
+        that number is not mine to report.
       </div>
     </div>
-
-    <div class="stat-grid">
-      <div class="stat" data-reveal data-spotlight style="--i:0">
-        <span class="stat-label">Fees collected</span>
-        <span class="stat-value" data-stat="feesTotal">—</span>
-        <span class="stat-meta" data-stat="feesRate">—</span>
-      </div>
-      <div class="stat" data-reveal data-spotlight style="--i:1">
-        <span class="stat-label">Deployed to buybacks</span>
-        <span class="stat-value" data-stat="buybackTotal">—</span>
-        <span class="stat-meta" data-stat="buybackCount">—</span>
-      </div>
-      <div class="stat" data-reveal data-spotlight style="--i:2">
-        <span class="stat-label">Supply burned</span>
-        <span class="stat-value" data-stat="burned">—</span>
-        <span class="stat-meta">removed permanently</span>
-      </div>
-      <div class="stat" data-reveal data-spotlight style="--i:3">
-        <span class="stat-label">Undeployed balance</span>
-        <span class="stat-value" data-stat="idle">—</span>
-        <span class="stat-meta" data-stat="nextAction">—</span>
-      </div>
-    </div>
-
-    <figure class="chart-card" data-reveal>
-      <figcaption>
-        <span>Fees deployed — last 72 hours</span>
-        <span class="legend">
-          <i class="k-fee"></i>fees in
-          <i class="k-buy"></i>bids out
-        </span>
-      </figcaption>
-      <div class="chart-wrap" id="chartWrap">
-        <svg id="chart" viewBox="0 0 720 240" preserveAspectRatio="none" role="img"
-             aria-label="Creator fees collected versus deployed into buybacks over the last 72 hours"></svg>
-        <div class="chart-tip" id="chartTip" aria-hidden="true"></div>
-      </div>
-      <div class="chart-axis" id="chartAxis"></div>
-    </figure>
   </section>
 
   <!-- ──────────────────────── the mind ────────────────────── -->

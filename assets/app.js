@@ -1,11 +1,10 @@
 /*
- * ORACLE — front-end runtime.
+ * ODYSSEUS — front-end runtime.
  *
- * Two data paths, chosen by config.data.mode:
+ * Binds config to the page, and fills the directive log from one of two
+ * sources chosen by config.data.mode:
  *   "live"      — GET config.data.endpoint, expect the shape in README.md.
- *   "simulated" — a deterministic local model. Labelled on the page as such,
- *                 because presenting invented treasury figures as real would
- *                 be a lie told in a monospace font.
+ *   "simulated" — a deterministic local model, labelled as such on the page.
  */
 (function () {
   "use strict";
@@ -58,8 +57,6 @@
   var AGE_DAYS = 34;                           // how long ago it was handed a key
   var FEE_RATE_PER_MIN = 0.0145;               // ◎ arriving per minute, before wobble
   var BATCH_MIN = 60;                          // the wallet deploys on this cadence
-  var DEPLOY_LAG = 2;                          // batches a directive takes to clear
-  var WINDOW = 72;                             // batches drawn on the chart
   var PRICE_PER_TOKEN = 0.0000042;             // ◎ per token, used to convert burns
 
   // Anchored to the current UTC day so the entity always reads as a young coin
@@ -79,52 +76,7 @@
   }
 
   function simulate(now) {
-    var current = batchIndexAt(now);
-    var firstShown = Math.max(0, current - (WINDOW - 1));
-
-    // prefix[i] = every fee collected through the close of batch i
-    var prefix = [];
-    var running = 0;
-    for (var i = 0; i <= current; i++) {
-      running += feesForBatch(i);
-      prefix[i] = running;
-    }
-    var through = function (i) { return i < 0 ? 0 : prefix[Math.min(i, current)]; };
-
-    // fees drip continuously; the open batch fills in real time
-    var into = Math.min(1, (now - (GENESIS + current * BATCH_MIN * 60000)) / (BATCH_MIN * 60000));
-    var feesTotal = through(current - 1) + feesForBatch(current) * into;
-
-    // directives take a few batches to work through the book, so deployment
-    // trails collection — the gap between the two lines is the working balance
-    var deployedTotal = through(current - DEPLOY_LAG);
-
-    var series = [];
-    for (var j = firstShown; j <= current; j++) {
-      series.push({
-        t: GENESIS + j * BATCH_MIN * 60000,
-        fees: j === current ? feesTotal : through(j),
-        deployed: through(j - DEPLOY_LAG),
-      });
-    }
-
-    var split = {};
-    DOCTRINE.forEach(function (d) { split[d.key] = deployedTotal * (d.weight / 100); });
-
-    var idle = Math.max(0, feesTotal - deployedTotal);
-
-    return {
-      feesTotal: feesTotal,
-      deployed: split,
-      deployedTotal: deployedTotal,
-      burned: (split.buyback || 0) / PRICE_PER_TOKEN,
-      idle: idle,
-      batches: current,
-      nextBatchAt: GENESIS + (current + 1) * BATCH_MIN * 60000,
-      series: series,
-      directives: directives(current),
-      simulated: true,
-    };
+    return { directives: directives(batchIndexAt(now)), simulated: true };
   }
 
   /* ── directive language ──────────────────────────────── */
@@ -268,8 +220,8 @@
     var note = $("#modeNote");
     if (note) {
       note.innerHTML = (CFG.data && CFG.data.mode === "live")
-        ? "Figures read live from the treasury. Verify them on-chain."
-        : "<b>Simulated telemetry</b> — this deployment is not yet wired to a live wallet. Numbers below are a model, not a balance.";
+        ? "Directives read live from the treasury. Verify them on-chain."
+        : "<b>Modelled</b> — the addresses above are real and checkable. The stream, the ledger and the simulator are a model of the process, not a record of one.";
     }
   }
 
@@ -289,211 +241,11 @@
   /* ── render ──────────────────────────────────────────── */
 
   function render(state) {
-    tweenStat("feesTotal", state.feesTotal, sol);
-    setStat("feesRate", "≈ " + sol(FEE_RATE_PER_MIN * 60) + " / hour");
-    tweenStat("buybackTotal", state.deployed.buyback || 0, sol);
-    setStat("buybackCount", state.batches.toLocaleString() + " directives executed");
-    tweenStat("burned", state.burned, function (v) { return compact(v) + " tokens"; });
-    tweenStat("idle", state.idle, sol);
-
-    var mins = Math.max(0, Math.round((state.nextBatchAt - Date.now()) / 60000));
-    setStat("nextAction", "deploys in ~" + mins + " min");
-
-    drawChart(state.series);
     drawLog(state.directives);
-
     var meta = $("#ledgerMeta");
     if (meta) meta.textContent = state.directives.length + " recent";
   }
 
-  function setStat(key, val) {
-    var el = $('[data-stat="' + key + '"]');
-    if (el && el.textContent !== val) el.textContent = val;
-  }
-
-  /* Numbers count up on arrival and ease between refreshes, so a treasury that
-   * is always moving reads as moving rather than as a static figure. */
-  var shown = {};
-
-  function tweenStat(key, target, fmt) {
-    var el = $('[data-stat="' + key + '"]');
-    if (!el) return;
-
-    var motion = !window.ORACLE_FX || window.ORACLE_FX.motion;
-    if (!motion) { el.textContent = fmt(target); shown[key] = target; return; }
-
-    var from = shown[key];
-    if (from == null) from = target * 0.82; // first paint counts up from just below
-    if (Math.abs(target - from) < 1e-9) { el.textContent = fmt(target); return; }
-
-    if (from !== target && shown[key] != null) {
-      el.classList.add("bumped");
-      setTimeout(function () { el.classList.remove("bumped"); }, 700);
-    }
-
-    var start = performance.now();
-    var dur = shown[key] == null ? 1400 : 600;
-    shown[key] = target;
-
-    (function step(now) {
-      var p = Math.min(1, (now - start) / dur);
-      var e = 1 - Math.pow(1 - p, 3);
-      el.textContent = fmt(from + (target - from) * e);
-      if (p < 1 && shown[key] === target) requestAnimationFrame(step);
-      else if (shown[key] === target) el.textContent = fmt(target);
-    })(start);
-  }
-
-  var chartState = { series: null, drawn: false, geom: null };
-
-  function drawChart(series) {
-    var svg = $("#chart");
-    if (!svg || !series || series.length < 2) return;
-
-    var W = 720, H = 240, PAD = 8;
-
-    // Cumulative totals dwarf a single day's inflow, so rebase to the start of
-    // the window — otherwise both lines pin to the top and the shape is lost.
-    var base = Math.min(series[0].deployed, series[0].fees);
-    var rel = function (v) { return Math.max(0, v - base); };
-    var max = rel(series[series.length - 1].fees) * 1.08 || 1;
-
-    var x = function (i) { return PAD + (i / (series.length - 1)) * (W - PAD * 2); };
-    var y = function (v) { return H - PAD - (rel(v) / max) * (H - PAD * 2); };
-
-    var feeLine = series.map(function (p, i) { return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(p.fees).toFixed(1); }).join(" ");
-    var buyLine = series.map(function (p, i) { return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(p.deployed).toFixed(1); }).join(" ");
-    var area = feeLine + " L" + x(series.length - 1).toFixed(1) + " " + (H - PAD) + " L" + x(0).toFixed(1) + " " + (H - PAD) + " Z";
-
-    var grid = [0.25, 0.5, 0.75, 1].map(function (f) {
-      var gy = (H - PAD * 2) * f + PAD;
-      return '<line x1="' + PAD + '" x2="' + (W - PAD) + '" y1="' + gy + '" y2="' + gy +
-             '" stroke="#1c2032" stroke-width="1" stroke-dasharray="2 6"/>';
-    }).join("");
-
-    var last = series[series.length - 1];
-    var lastX = x(series.length - 1).toFixed(1);
-    var lastY = y(last.fees).toFixed(1);
-
-    svg.innerHTML =
-      "<defs>" +
-      '<linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="#22d3ee" stop-opacity="0.30"/>' +
-      '<stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>' +
-      "</linearGradient>" +
-      // cyan throughout: a violet start would read as the violet "bids out" series
-      '<linearGradient id="feeStroke" x1="0" y1="0" x2="1" y2="0">' +
-      '<stop offset="0%" stop-color="#0e7f97"/><stop offset="100%" stop-color="#22d3ee"/>' +
-      "</linearGradient>" +
-      '<filter id="glow" x="-20%" y="-40%" width="140%" height="180%">' +
-      '<feGaussianBlur stdDeviation="3.4" result="b"/>' +
-      '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
-      "</filter>" +
-      "</defs>" +
-      grid +
-      '<path class="area" d="' + area + '" fill="url(#fill)"/>' +
-      '<path class="draw line-buy" d="' + buyLine + '" fill="none" stroke="#7b5cff"' +
-      ' stroke-width="1.6" stroke-linejoin="round" opacity="0.85"/>' +
-      '<path class="draw line-fee" d="' + feeLine + '" fill="none" stroke="url(#feeStroke)"' +
-      ' stroke-width="2.2" stroke-linejoin="round" filter="url(#glow)"/>' +
-      '<g class="cross" opacity="0">' +
-      '<line y1="' + PAD + '" y2="' + (H - PAD) + '" stroke="#3a4160" stroke-width="1" stroke-dasharray="3 4"/>' +
-      '<circle r="4" fill="#22d3ee"/><circle r="3" fill="#7b5cff"/>' +
-      "</g>" +
-      '<circle class="pin" cx="' + lastX + '" cy="' + lastY + '" r="3.5" fill="#22d3ee"/>' +
-      '<circle class="ping" cx="' + lastX + '" cy="' + lastY + '" r="3.5" fill="none" stroke="#22d3ee"/>';
-
-    chartState.series = series;
-    chartState.geom = { x: x, y: y, W: W, H: H, PAD: PAD };
-    animateLines(svg);
-    pingLast(svg);
-    drawAxis(series);
-  }
-
-  // Draw the lines on once, on first paint — replaying it every refresh would
-  // turn a live chart into a flashing one.
-  function animateLines(svg) {
-    if (chartState.drawn || (window.ORACLE_FX && !window.ORACLE_FX.motion)) {
-      $$(".draw", svg).forEach(function (p) { p.classList.remove("draw"); });
-      return;
-    }
-    chartState.drawn = true;
-    $$(".draw", svg).forEach(function (p, i) {
-      var len = p.getTotalLength();
-      p.style.setProperty("--len", len);
-      p.style.animationDelay = i * 220 + "ms";
-      requestAnimationFrame(function () { p.classList.add("go"); });
-    });
-  }
-
-  function pingLast(svg) {
-    var ping = $(".ping", svg);
-    if (!ping || (window.ORACLE_FX && !window.ORACLE_FX.motion)) return;
-    ping.innerHTML =
-      '<animate attributeName="r" from="3.5" to="16" dur="2.4s" repeatCount="indefinite"/>' +
-      '<animate attributeName="opacity" from="0.7" to="0" dur="2.4s" repeatCount="indefinite"/>';
-  }
-
-  function drawAxis(series) {
-    var axis = $("#chartAxis");
-    if (!axis) return;
-    // Clock times are useless here: a 72-hour window sampled at thirds lands on
-    // the same hour of day every time. Label the distance back instead.
-    var last = series[series.length - 1].t;
-    var picks = [0, Math.floor(series.length / 3), Math.floor((2 * series.length) / 3), series.length - 1];
-    axis.innerHTML = picks.map(function (i, n) {
-      if (n === picks.length - 1) return "<span>now</span>";
-      var hrs = Math.round((last - series[i].t) / 3600000);
-      return "<span>−" + hrs + "h</span>";
-    }).join("");
-  }
-
-  /* Crosshair readout: the chart is the only place the two series can be
-   * compared at a point in time, so it should be inspectable. */
-  function wireChartTooltip() {
-    var wrap = $("#chartWrap"), tip = $("#chartTip");
-    if (!wrap || !tip) return;
-
-    function move(e) {
-      var svg = $("#chart");
-      var s = chartState.series, g = chartState.geom;
-      if (!svg || !s || !g) return;
-
-      var r = svg.getBoundingClientRect();
-      var frac = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-      var i = Math.round(frac * (s.length - 1));
-      var p = s[i];
-
-      var cross = $(".cross", svg);
-      if (cross) {
-        var cx = g.x(i);
-        cross.setAttribute("opacity", "1");
-        cross.querySelector("line").setAttribute("x1", cx);
-        cross.querySelector("line").setAttribute("x2", cx);
-        var dots = cross.querySelectorAll("circle");
-        dots[0].setAttribute("cx", cx); dots[0].setAttribute("cy", g.y(p.fees));
-        dots[1].setAttribute("cx", cx); dots[1].setAttribute("cy", g.y(p.deployed));
-      }
-
-      var back = Math.round((s[s.length - 1].t - p.t) / 3600000);
-      tip.innerHTML =
-        '<span class="tip-t">' + (back === 0 ? "now" : "−" + back + "h") + "</span>" +
-        '<span class="tip-fee">' + sol(p.fees) + " collected</span><br>" +
-        '<span class="tip-buy">' + sol(p.deployed) + " deployed</span>";
-      tip.classList.add("on");
-
-      // keep the bubble inside the card instead of letting it hang off an edge
-      var px = (i / (s.length - 1)) * r.width;
-      tip.style.left = Math.min(r.width - 70, Math.max(70, px)) + "px";
-    }
-
-    wrap.addEventListener("pointermove", move);
-    wrap.addEventListener("pointerleave", function () {
-      tip.classList.remove("on");
-      var cross = $(".cross");
-      if (cross) cross.setAttribute("opacity", "0");
-    });
-  }
 
   var lastLogKey = "";
 
@@ -585,19 +337,7 @@
 
   // Tolerate a partial payload from a live endpoint rather than blanking the page.
   function normalize(s) {
-    var deployed = s.deployed || {};
-    var deployedTotal = Object.keys(deployed).reduce(function (a, k) { return a + (deployed[k] || 0); }, 0);
-    return {
-      feesTotal: s.feesTotal || 0,
-      deployed: deployed,
-      deployedTotal: deployedTotal,
-      burned: s.burned || 0,
-      idle: s.idle != null ? s.idle : Math.max(0, (s.feesTotal || 0) - deployedTotal),
-      batches: s.batches || (s.directives || []).length,
-      nextBatchAt: s.nextBatchAt || Date.now(),
-      series: s.series || [],
-      directives: s.directives || [],
-    };
+    return { directives: s.directives || [] };
   }
 
   function setStatus(cls, label) {
@@ -623,7 +363,6 @@
   bindStatic();
   marquee();
   tick();
-  wireChartTooltip();
   if (window.ORACLE_FX) ORACLE_FX.start();
   setInterval(tick, (CFG.data && CFG.data.refreshMs) || 6000);
 })();
