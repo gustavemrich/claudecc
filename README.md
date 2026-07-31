@@ -20,7 +20,7 @@ python3 -m http.server 8000
 | `index.html` | Page structure |
 | `assets/style.css` | All styling |
 | `assets/app.js` | Config binding, directive log, clipboard |
-| `assets/fx.js` | Atmosphere: core, constellation, boot, reveals, cursor |
+| `assets/fx.js` | Atmosphere: core, constellation, wake, boot, reveals |
 | `assets/sim.js` | The "Watch It Work" sandbox |
 | `assets/agent.js` | "The Mind" — the live cognition stream |
 | `config.js` | **Everything you need to edit** |
