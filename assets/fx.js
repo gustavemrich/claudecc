@@ -32,15 +32,15 @@ window.ORACLE_FX = (function () {
       cv.height = h * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      var target = Math.min(96, Math.round((w * h) / 17000));
+      var target = Math.min(52, Math.round((w * h) / 34000));
       nodes = [];
       for (var i = 0; i < target; i++) {
         nodes.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.22,
-          vy: (Math.random() - 0.5) * 0.22,
-          r: Math.random() * 1.4 + 0.6,
+          vx: (Math.random() - 0.5) * 0.11,
+          vy: (Math.random() - 0.5) * 0.11,
+          r: Math.random() * 1.0 + 0.45,
           tone: Math.random() < 0.28 ? "cyan" : (Math.random() < 0.16 ? "ember" : "violet"),
         });
       }
@@ -63,17 +63,17 @@ window.ORACLE_FX = (function () {
         var pdx = pointer.x - n.x, pdy = pointer.y - n.y;
         var pd2 = pdx * pdx + pdy * pdy;
         if (pd2 < 26000 && pd2 > 1) {
-          var pull = 0.00022 * (1 - pd2 / 26000);
+          var pull = 0.00010 * (1 - pd2 / 26000);
           n.vx += pdx * pull;
           n.vy += pdy * pull;
         }
         var sp = Math.hypot(n.vx, n.vy);
-        if (sp > 0.55) { n.vx *= 0.55 / sp; n.vy *= 0.55 / sp; }
+        if (sp > 0.26) { n.vx *= 0.26 / sp; n.vy *= 0.26 / sp; }
 
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.r, 0, 6.2832);
-        ctx.fillStyle = n.tone === "cyan" ? "rgba(34,211,238,0.55)"
-          : n.tone === "ember" ? "rgba(255,138,60,0.55)" : "rgba(167,139,255,0.45)";
+        ctx.fillStyle = n.tone === "cyan" ? "rgba(34,211,238,0.26)"
+          : n.tone === "ember" ? "rgba(255,138,60,0.24)" : "rgba(167,139,255,0.20)";
         ctx.fill();
       }
 
@@ -93,7 +93,7 @@ window.ORACLE_FX = (function () {
           ctx.beginPath();
           ctx.moveTo(nodes[a].x, nodes[a].y);
           ctx.lineTo(nodes[b].x, nodes[b].y);
-          ctx.strokeStyle = "rgba(123,92,255," + (t * 0.13 + near * t * 0.4).toFixed(3) + ")";
+          ctx.strokeStyle = "rgba(123,92,255," + (t * 0.05 + near * t * 0.16).toFixed(3) + ")";
           ctx.lineWidth = 1;
           ctx.stroke();
         }
@@ -212,7 +212,7 @@ window.ORACLE_FX = (function () {
   /* ── scroll reveals + progress ───────────────────────── */
 
   function reveals() {
-    var items = document.querySelectorAll("[data-reveal], .laws li");
+    var items = document.querySelectorAll("[data-reveal], .laws li, .section");
     if (!("IntersectionObserver" in window) || !MOTION) {
       [].forEach.call(items, function (el) { el.classList.add("in"); });
       return;
@@ -311,13 +311,13 @@ window.ORACLE_FX = (function () {
       cx = w / 2; cy = h / 2; R = Math.min(w, h) / 2;
 
       bits = [];
-      for (var i = 0; i < 58; i++) {
+      for (var i = 0; i < 34; i++) {
         bits.push({
           a: Math.random() * 6.2832,
           r: R * (0.30 + Math.random() * 0.62),
-          sp: (0.10 + Math.random() * 0.45) * (Math.random() < 0.3 ? -1 : 1),
+          sp: (0.05 + Math.random() * 0.22) * (Math.random() < 0.3 ? -1 : 1),
           tilt: 0.24 + Math.random() * 0.5,
-          size: 0.7 + Math.random() * 1.7,
+          size: 0.5 + Math.random() * 1.2,
           tone: Math.random() < 0.4 ? "cyan" : (Math.random() < 0.3 ? "ember" : "violet"),
         });
       }
@@ -342,10 +342,10 @@ window.ORACLE_FX = (function () {
         ctx.beginPath();
         ctx.arc(x, y, b.size * (0.55 + depth * 0.7), 0, 6.2832);
         ctx.fillStyle = b.tone === "cyan"
-          ? "rgba(34,211,238," + (0.14 + depth * 0.5).toFixed(3) + ")"
+          ? "rgba(34,211,238," + (0.08 + depth * 0.30).toFixed(3) + ")"
           : b.tone === "ember"
-          ? "rgba(255,138,60," + (0.16 + depth * 0.55).toFixed(3) + ")"
-          : "rgba(167,139,255," + (0.12 + depth * 0.45).toFixed(3) + ")";
+          ? "rgba(255,138,60," + (0.09 + depth * 0.32).toFixed(3) + ")"
+          : "rgba(167,139,255," + (0.07 + depth * 0.26).toFixed(3) + ")";
         ctx.fill();
 
         // a short trail behind each particle
@@ -365,8 +365,8 @@ window.ORACLE_FX = (function () {
     }
 
     window.addEventListener("pointermove", function (e) {
-      lean.tx = (e.clientX / window.innerWidth - 0.5) * 34;
-      lean.ty = (e.clientY / window.innerHeight - 0.5) * 26;
+      lean.tx = (e.clientX / window.innerWidth - 0.5) * 20;
+      lean.ty = (e.clientY / window.innerHeight - 0.5) * 15;
     }, { passive: true });
 
     var rt;
@@ -380,95 +380,62 @@ window.ORACLE_FX = (function () {
     requestAnimationFrame(frame);
   }
 
-  /* ── pointer ring ────────────────────────────────────── */
+  /* ── the wake ────────────────────────────────────────── */
 
-  function cursor() {
-    // only where there is a real pointer to follow
-    if (!MOTION || !window.matchMedia("(pointer: fine)").matches) return;
+  // Three hairlines drifting out of phase, low in the hero. Slow enough that
+  // you notice it only on the second look — which is the point.
+  function wake() {
+    var cv = document.getElementById("wakeCanvas");
+    if (!cv || !MOTION) return;
 
-    var ring = document.createElement("div");
-    ring.className = "cursor-ring";
-    ring.setAttribute("aria-hidden", "true");
-    document.body.appendChild(ring);
+    var ctx = cv.getContext("2d");
+    var w = 0, h = 0, t = 0, alive = true;
 
-    var x = -100, y = -100, rx = -100, ry = -100;
-    window.addEventListener("pointermove", function (e) {
-      x = e.clientX; y = e.clientY;
-      var hot = e.target && e.target.closest &&
-        e.target.closest("a, button, [role='button'], .ca-bar, .sim-btn, .sim-chip");
-      ring.classList.toggle("hot", !!hot);
-    }, { passive: true });
-    document.addEventListener("pointerdown", function () { ring.classList.add("down"); });
-    document.addEventListener("pointerup", function () { ring.classList.remove("down"); });
+    var lines = [
+      { amp: 0.30, freq: 1.5, sp: 0.00022, y: 0.52, a: 0.20, c: "123,92,255" },
+      { amp: 0.22, freq: 2.3, sp: -0.00031, y: 0.60, a: 0.15, c: "34,211,238" },
+      { amp: 0.16, freq: 3.4, sp: 0.00017, y: 0.68, a: 0.10, c: "255,138,60" },
+    ];
 
-    (function trail() {
-      rx += (x - rx) * 0.18;
-      ry += (y - ry) * 0.18;
-      ring.style.transform = "translate3d(" + rx.toFixed(1) + "px," + ry.toFixed(1) + "px,0) translate(-50%,-50%)";
-      requestAnimationFrame(trail);
-    })();
-  }
+    function size() {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = cv.clientWidth; h = cv.clientHeight;
+      cv.width = w * dpr; cv.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
 
-  /* ── magnetic buttons + click ripple ─────────────────── */
+    function frame(now) {
+      if (!alive) return;
+      ctx.clearRect(0, 0, w, h);
+      t = now;
 
-  function magnets() {
-    if (!MOTION) return;
-
-    document.addEventListener("pointermove", function (e) {
-      var el = e.target && e.target.closest && e.target.closest(".btn, .sim-btn");
-      if (!el) return;
-      var r = el.getBoundingClientRect();
-      var dx = (e.clientX - (r.left + r.width / 2)) / r.width;
-      var dy = (e.clientY - (r.top + r.height / 2)) / r.height;
-      el.style.transform = "translate(" + (dx * 7).toFixed(1) + "px," + (dy * 5 - 2).toFixed(1) + "px)";
-    }, { passive: true });
-
-    document.addEventListener("pointerout", function (e) {
-      var el = e.target && e.target.closest && e.target.closest(".btn, .sim-btn");
-      if (el) el.style.transform = "";
-    }, { passive: true });
-
-    document.addEventListener("pointerdown", function (e) {
-      var el = e.target && e.target.closest && e.target.closest(".btn, .sim-btn, .sim-chip, .copy-btn");
-      if (!el) return;
-      var r = el.getBoundingClientRect();
-      var ink = document.createElement("span");
-      ink.className = "ripple";
-      ink.style.left = (e.clientX - r.left) + "px";
-      ink.style.top = (e.clientY - r.top) + "px";
-      el.appendChild(ink);
-      setTimeout(function () { ink.remove(); }, 650);
-    });
-  }
-
-  /* ── card tilt ───────────────────────────────────────── */
-
-  function tilt() {
-    if (!MOTION || !window.matchMedia("(pointer: fine)").matches) return;
-
-    document.addEventListener("pointermove", function (e) {
-      var el = e.target && e.target.closest && e.target.closest("[data-spotlight]");
-      if (!el) return;
-
-      // A tilting card moves its own buttons out from under the cursor, which
-      // turns a deliberate click into a miss. Sit flat while a control is aimed at.
-      if (e.target.closest("button, a, input, textarea, [role='button']")) {
-        el.style.transform = "";
-        return;
+      for (var i = 0; i < lines.length; i++) {
+        var L = lines[i];
+        ctx.beginPath();
+        for (var x = 0; x <= w; x += 6) {
+          var u = x / w;
+          var y = L.y * h +
+            Math.sin(u * Math.PI * L.freq + t * L.sp) * (L.amp * h) *
+            // taper to nothing at both ends so the line has no hard edges
+            Math.sin(u * Math.PI);
+          x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = "rgba(" + L.c + "," + L.a + ")";
+        ctx.lineWidth = 1;
+        ctx.stroke();
       }
+      requestAnimationFrame(frame);
+    }
 
-      var r = el.getBoundingClientRect();
-      var dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
-      var dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-      el.style.transform =
-        "perspective(900px) rotateX(" + (-dy * 2.2).toFixed(2) + "deg) rotateY(" +
-        (dx * 2.6).toFixed(2) + "deg) translateY(-2px)";
-    }, { passive: true });
+    var rt;
+    window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(size, 200); });
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) alive = false;
+      else if (!alive) { alive = true; requestAnimationFrame(frame); }
+    });
 
-    document.addEventListener("pointerout", function (e) {
-      var el = e.target && e.target.closest && e.target.closest("[data-spotlight]");
-      if (el) el.style.transform = "";
-    }, { passive: true });
+    size();
+    requestAnimationFrame(frame);
   }
 
   /* ── headings arrive word by word ────────────────────── */
@@ -503,14 +470,12 @@ window.ORACLE_FX = (function () {
         scrambleTitles();
         constellation();
         core();
+        wake();
         reveals();
       });
       progress();
       pointerLight();
       statusLine();
-      cursor();
-      magnets();
-      tilt();
     },
   };
 })();

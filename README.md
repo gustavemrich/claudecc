@@ -91,16 +91,32 @@ darkest for terminals and input wells.
 small uppercase mono labels use it, so do not darken it without re-checking.
 Only `--copy` and the boot hint sit below that, and neither carries meaning.
 
+Glows are deliberately weak. Neon reads cheap at this size; the page should
+look lit rather than illuminated. If something needs emphasis, reach for
+spacing or weight before reaching for a shadow.
+
+**Never apply `text-transform` to an address.** Base58 is case-sensitive, so an
+uppercased wallet renders as an address that does not exist. The pending-state
+styling is scoped to `[data-card="mint"]` for exactly this reason — it once
+leaked onto the real wallet and displayed it wrong.
+
 ## Motion
 
 `fx.js` is decoration only — it owns no state the page depends on, so all of it
-is safe to drop. It carries the hero core (orbiting particles that lean toward
-the pointer), the constellation, the pointer ring, magnetic buttons, card tilt,
-word-by-word headings and the travelling edge-light on live panels.
+is safe to drop. It carries four slow things and nothing else: the hero core
+(orbiting particles leaning toward the pointer), the constellation, the wake
+(three hairlines drifting out of phase under the hero), and word-by-word
+headings. Section rules draw themselves left to right as each section arrives.
 
-Under `prefers-reduced-motion: reduce` the boot sequence is skipped, the core
-and constellation and pointer ring are removed, the edge-lights stop, and every
-reveal starts visible. Verify changes in both modes.
+The rule for adding here is restraint. A pointer ring, magnetic buttons, card
+tilt, scanlines and a rotating conic border were all built and then removed:
+each one worked, and together they read as a demo rather than a product. Card
+tilt also moved buttons out from under the cursor and caused real misclicks.
+Prefer one more considered thing over three more clever ones.
+
+Under `prefers-reduced-motion: reduce` the boot sequence is skipped, the core,
+constellation and wake are removed, and every reveal starts visible. Verify
+changes in both modes.
 
 The core hangs off the right edge of the hero on purpose. `.hero` uses
 `overflow-x: clip` to contain it — `body { overflow-x: hidden }` alone does not

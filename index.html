@@ -22,7 +22,6 @@
 <!-- ── atmosphere ── -->
 <canvas class="fx-net" id="fxNet" aria-hidden="true"></canvas>
 <div class="glow" aria-hidden="true"></div>
-<div class="scanlines" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 <div class="spotlight" aria-hidden="true"></div>
 
@@ -97,6 +96,7 @@
       <a class="btn ghost" href="#watch" data-sim-start>Watch it work</a>
     </div>
     <p class="hero-note" id="modeNote" data-reveal style="--i:5"></p>
+    <canvas class="wake" id="wakeCanvas" aria-hidden="true"></canvas>
   </section>
 
   <!-- ── ticker ── -->
@@ -112,7 +112,7 @@
       <p>One wallet. Publicly readable. Permanently on watch.</p>
     </div>
 
-    <div class="wallet-card" data-reveal data-spotlight style="--i:0">
+    <div class="wallet-card" data-card="mint" data-reveal data-spotlight style="--i:0">
       <div class="wallet-head">
         <span class="tag">contract address</span>
         <a class="explorer" data-bind="mintLink" href="#" target="_blank" rel="noopener">open in explorer ↗</a>
