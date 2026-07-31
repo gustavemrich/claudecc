@@ -51,11 +51,12 @@ than changing its shape.
 
 ### Connecting a real price
 
-`config.market` switches the price line from the model to the real token:
+`config.market` switches the price line from the model to the real token. It is
+**on** — the simulator follows the live price when the feed answers:
 
 ```js
 market: {
-  mode: "live",                                                   // from "sandbox"
+  mode: "live",                                                   // "sandbox" to switch off
   feed: "https://api.dexscreener.com/latest/dex/tokens/{mint}",   // {mint} is substituted
   pricePath: "pairs.0.priceUsd",                                  // dot-path into the response
   pollMs: 20000,
@@ -77,7 +78,11 @@ Three things hold in live mode, by design:
 - The doctrine overlay — floor, burns, reserve — stays modelled, and the label
   under the heading says so. Only the price becomes real.
 
-If the feed fails, it falls back to the sandbox model and relabels itself.
+If the feed fails — including while a freshly deployed mint is not yet indexed
+— it falls back to the sandbox model and relabels itself "price feed
+unreachable · running the sandbox model". It keeps polling, so it starts
+following the real price on its own once the pair appears. Nothing needs
+touching in between.
 
 ## Palette
 
@@ -136,8 +141,8 @@ touching.
 The two addresses it is built around:
 
 ```js
-token:  { mint: "", pending: "coming soon", explorer: "https://solscan.io/token/" },
-wallet: { address: "EPdm…CEbo", explorer: "https://solscan.io/account/" },
+token:  { mint: "RYoY…t2pump", pending: "coming soon", explorer: "https://solscan.io/token/" },
+wallet: { address: "EmDe…1sFxC", explorer: "https://solscan.io/account/" },  // the deployer
 social: { x: "https://x.com/odysseuspf", handle: "@odysseuspf" },
 ```
 
@@ -204,7 +209,7 @@ signing, and no write path — it reads and renders, nothing more.
 
 ## Before going live
 
-The mint and the operating wallet are real and checkable. Everything else —
+The mint and the deployer wallet are real and checkable. Everything else —
 the cognition stream, the directive log, the sandbox — is a model of the
 process, and the hero label says so.
 

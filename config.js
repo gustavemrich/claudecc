@@ -20,7 +20,7 @@ window.ORACLE_CONFIG = {
    * hide, and the primary button points at X instead. Fill it in and every one
    * of those flips back on its own — nothing else to edit. */
   token: {
-    mint: "",
+    mint: "RYoYXquMLJh74SnJ4aNETFsZeQnEUu9ydW1xxt2pump",
     pending: "coming soon",
     explorer: "https://solscan.io/token/",
   },
@@ -32,10 +32,10 @@ window.ORACLE_CONFIG = {
   },
 
   /* ---- the wallet ----
-   * The single address the entity operates from. Creator fees land here,
-   * every directive is executed from here, and anyone can audit it. */
+   * The deployer. Creator fees land here, every directive is executed from
+   * here, and anyone can audit it. */
   wallet: {
-    address: "EPdmPbL7TP8kGryoxz5ybiV2CMS7UnemRzAPhomaCEbo",
+    address: "EmDetxFGdpypii4ZgGQcLCeaAFGwgTPMRvF6uzu1sFxC",
     explorer: "https://solscan.io/account/",
   },
 
@@ -62,7 +62,7 @@ window.ORACLE_CONFIG = {
    * `pricePath` is a dot-path into the response; array indexes are numbers.
    * The provider must allow browser requests — this page has no backend. */
   market: {
-    mode: "sandbox",
+    mode: "live",
     feed: "https://api.dexscreener.com/latest/dex/tokens/{mint}",
     pricePath: "pairs.0.priceUsd",
     pollMs: 20000,
